@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/menu :: cabecera('Listado de videojuegos')}"></head>
+<body>
+<nav th:replace="~{fragmentos/menu :: menu}"></nav>
+
+<h1>Listado de videojuegos</h1>
+
+<div class="error" th:if="${error}" th:text="${error}"></div>
+
+<div class="container">
+    <div class="form">
+        <form th:action="@{/videojuegos/listado}" method="get">
+            <label for="titulo">Título</label>
+            <input type="text" id="titulo" name="titulo" th:value="${titulo}">
+
+            <label for="idDesarrolladora">Desarrolladora</label>
+            <select id="idDesarrolladora" name="idDesarrolladora">
+                <option value="">Todas</option>
+                <option th:each="d : ${listaDesarrolladoras}"
+                        th:value="${d.id}"
+                        th:text="${d.descripcion}"
+                        th:selected="${d.id == idDesarrolladora}"></option>
+            </select>
+
+            <label for="anioDesde">Año desde</label>
+            <input type="number" id="anioDesde" name="anioDesde" th:value="${anioDesde}">
+
+            <label for="pegiMax">PEGI máximo</label>
+            <select id="pegiMax" name="pegiMax">
+                <option value="">Cualquiera</option>
+                <option th:each="p : ${listaPegi}"
+                        th:value="${p}"
+                        th:text="${p}"
+                        th:selected="${p == pegiMax}"></option>
+            </select>
+
+            <label for="soloDisponibles">Solo con copias disponibles</label>
+            <input type="checkbox" id="soloDisponibles" name="soloDisponibles" value="true"
+                   th:checked="${soloDisponibles}">
+
+            <input type="submit" value="Buscar">
+        </form>
+    </div>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Desarrolladora</th>
+        <th>Año</th>
+        <th>PEGI</th>
+        <th>Copias</th>
+        <th>Disponibles</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="v : ${listaVideojuegos}">
+        <td th:text="${v.id}"></td>
+        <td th:text="${v.titulo}"></td>
+        <td th:text="${v.desarrolladora}"></td>
+        <td th:text="${v.anioLanzamiento}"></td>
+        <td th:text="${v.pegi}"></td>
+        <td th:text="${v.copiasTotales}"></td>
+        <td th:text="${v.copiasDisponibles}"></td>
+    </tr>
+    <tr th:if="${error == null and #lists.isEmpty(listaVideojuegos)}">
+        <td colspan="7">No se han encontrado videojuegos con esos filtros.</td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

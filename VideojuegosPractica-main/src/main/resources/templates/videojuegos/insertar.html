@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/menu :: cabecera('Insertar videojuego')}"></head>
+<body>
+<nav th:replace="~{fragmentos/menu :: menu}"></nav>
+
+<h1>Insertar videojuego</h1>
+
+<div class="container">
+    <div class="form">
+        <form th:action="@{/videojuegos/insertar}" method="post">
+            <label for="titulo">Título</label>
+            <input type="text" id="titulo" name="titulo" th:value="${titulo}">
+
+            <label for="anioLanzamiento">Año de lanzamiento</label>
+            <input type="number" id="anioLanzamiento" name="anioLanzamiento" th:value="${anioLanzamiento}">
+
+            <label for="pegi">PEGI</label>
+            <select id="pegi" name="pegi">
+                <option th:each="p : ${listaPegi}"
+                        th:value="${p}"
+                        th:text="${p}"
+                        th:selected="${p == pegi}"></option>
+            </select>
+
+            <label for="idDesarrolladora">Desarrolladora</label>
+            <select id="idDesarrolladora" name="idDesarrolladora">
+                <option value="">Selecciona una desarrolladora</option>
+                <option th:each="d : ${listaDesarrolladoras}"
+                        th:value="${d.id}"
+                        th:text="${d.descripcion}"
+                        th:selected="${d.id == idDesarrolladora}"></option>
+            </select>
+
+            <input type="submit" value="Insertar">
+        </form>
+    </div>
+</div>
+
+<div class="ok" th:if="${mensajeOk}" th:text="${mensajeOk}"></div>
+<div class="error" th:if="${error}" th:text="${error}"></div>
+</body>
+</html>
