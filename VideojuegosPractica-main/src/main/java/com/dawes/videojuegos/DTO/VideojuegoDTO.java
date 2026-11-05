@@ -13,7 +13,6 @@ public class VideojuegoDTO {
 	public VideojuegoDTO() {
 	}
 
-	/** Constructor para el alta: solo los campos que se insertan. */
 	public VideojuegoDTO(String titulo, Integer anioLanzamiento, Integer pegi, Integer idDesarrolladora) {
 		this.titulo = titulo;
 		this.anioLanzamiento = anioLanzamiento;
@@ -21,7 +20,7 @@ public class VideojuegoDTO {
 		this.idDesarrolladora = idDesarrolladora;
 	}
 
-	/** Constructor para el listado: los datos que devuelve la vista v_videojuegos_detalle. */
+
 	public VideojuegoDTO(Integer id, String titulo, Integer anioLanzamiento, Integer pegi, Integer idDesarrolladora,
 	                     String desarrolladora, Integer copiasTotales, Integer copiasDisponibles) {
 		this.id = id;

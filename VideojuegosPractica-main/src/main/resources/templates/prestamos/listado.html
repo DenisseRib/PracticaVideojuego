@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/menu :: cabecera('Listado de préstamos')}"></head>
+<body>
+<nav th:replace="~{fragmentos/menu :: menu}"></nav>
+
+<h1>Listado de préstamos</h1>
+
+<div class="error" th:if="${error}" th:text="${error}"></div>
+
+<div class="container">
+    <div class="form">
+        <form th:action="@{/prestamos/listado}" method="get">
+            <label for="estado">Estado</label>
+            <select id="estado" name="estado">
+                <option value="">Todos</option>
+                <option value="ABIERTOS" th:selected="${estado == 'ABIERTOS'}">Abiertos</option>
+                <option value="VENCIDOS" th:selected="${estado == 'VENCIDOS'}">Vencidos</option>
+                <option value="DEVUELTOS" th:selected="${estado == 'DEVUELTOS'}">Devueltos</option>
+            </select>
+
+            <input type="submit" value="Buscar">
+        </form>
+    </div>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Socio</th>
+        <th>Videojuego</th>
+        <th>Plataforma</th>
+        <th>Copia</th>
+        <th>Fecha préstamo</th>
+        <th>Fecha límite</th>
+        <th>Fecha devolución</th>
+        <th>Multa</th>
+        <th>Estado</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="p : ${listaPrestamos}">
+        <td th:text="${p.id}"></td>
+        <td th:text="${p.socio}"></td>
+        <td th:text="${p.videojuego}"></td>
+        <td th:text="${p.plataforma}"></td>
+        <td th:text="${p.codigoCopia}"></td>
+        <td th:text="${p.fechaPrestamo}"></td>
+        <td th:text="${p.fechaLimite}"></td>
+        <td th:text="${p.fechaDevolucion} ?: '—'"></td>
+        <td th:text="${p.multa}"></td>
+        <td th:text="${p.estado}"></td>
+    </tr>
+    <tr th:if="${error == null and #lists.isEmpty(listaPrestamos)}">
+        <td colspan="10">No se han encontrado préstamos.</td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

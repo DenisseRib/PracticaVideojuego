@@ -1,6 +1,5 @@
 package com.dawes.videojuegos.DTO;
 
-/** Pareja id + texto para rellenar los desplegables (select) desde la base de datos. */
 public class DesplegableDTO {
 	private Integer id;
 	private String descripcion;

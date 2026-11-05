@@ -19,10 +19,6 @@ public class InicioRepository {
 		this.dataSource = dataSource;
 	}
 
-	/**
-	 * Cuenta videojuegos, socios activos, préstamos abiertos (fecha_devolucion IS NULL)
-	 * y préstamos vencidos (abiertos con fecha_limite anterior a la fecha indicada).
-	 */
 	public ContadoresInicioDTO obtenerContadores(LocalDate hoy) throws SQLException {
 		String sql = "SELECT "
 				+ "(SELECT COUNT(*) FROM videojuegos) AS videojuegos, "

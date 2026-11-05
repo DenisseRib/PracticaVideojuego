@@ -13,7 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-/** Únicamente SQL. Todas las consultas usan PreparedStatement con parámetros (?). */
+
 @Repository
 public class VideojuegoRepository {
 	private static final Logger logger = LoggerFactory.getLogger(VideojuegoRepository.class);
@@ -71,7 +71,6 @@ public class VideojuegoRepository {
 		return listaVideojuegos;
 	}
 
-	/** Inserta el videojuego y devuelve el id que le ha asignado la base de datos. */
 	public int insertarVideojuego(VideojuegoDTO videojuego) throws SQLException {
 		String sql = "INSERT INTO videojuegos (titulo, anio_lanzamiento, pegi, id_desarrolladora) VALUES (?, ?, ?, ?)";
 

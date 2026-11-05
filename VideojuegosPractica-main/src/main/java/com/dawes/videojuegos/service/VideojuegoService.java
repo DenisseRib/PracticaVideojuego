@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Aquí viven las validaciones del alta de videojuegos (apartado 3.3 del enunciado). */
+
 @Service
 public class VideojuegoService {
 	public static final int ANIO_MINIMO = 1970;
@@ -28,7 +28,7 @@ public class VideojuegoService {
 
 	public ArrayList<VideojuegoDTO> buscarVideojuegos(String titulo, Integer idDesarrolladora, Integer anioDesde,
 	                                                  Integer pegiMax, boolean soloDisponibles) throws SQLException {
-		// Un título vacío o con solo espacios equivale a "sin filtro por título"
+
 		String tituloLimpio = (titulo == null || titulo.isBlank()) ? null : titulo.trim();
 		return videojuegoDAO.buscarVideojuegos(tituloLimpio, idDesarrolladora, anioDesde, pegiMax, soloDisponibles);
 	}
@@ -41,12 +41,7 @@ public class VideojuegoService {
 		return PEGI_VALIDOS;
 	}
 
-	/**
-	 * Valida el videojuego y lo inserta. Si algún dato no es válido no se inserta nada
-	 * y se lanza una ValidacionException con todo lo que hay que corregir.
-	 *
-	 * @return el id que la base de datos ha asignado al videojuego
-	 */
+
 	public int insertarVideojuego(VideojuegoDTO videojuego) throws SQLException, ValidacionException {
 		ArrayList<String> errores = new ArrayList<>();
 		int anioActual = LocalDate.now().getYear();
