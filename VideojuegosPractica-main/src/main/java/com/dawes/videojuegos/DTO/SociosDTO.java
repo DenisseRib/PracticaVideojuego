@@ -3,93 +3,66 @@ package com.dawes.videojuegos.DTO;
 import java.time.LocalDate;
 
 public class SociosDTO {
-    private int idSocio;
+
+    private Integer idSocio;
     private String nombre;
     private String apellidos;
     private String email;
+    private LocalDate fechaNacimiento;
+    private LocalDate fechaAlta;
+    private boolean activo;
     private Integer edad;
     private Integer prestamosAbiertos;
 
+    public SociosDTO() {
+    }
 
-    private boolean activo;
 
-   
+    public SociosDTO(String nombre, String apellidos, String email, LocalDate fechaNacimiento) {
+        this.nombre = nombre;
+        this.apellidos = apellidos;
+        this.email = email;
+        this.fechaNacimiento = fechaNacimiento;
+    }
 
-    public SociosDTO(int idSocio, String nombre, String apellidos, String email, Integer edad, Integer prestamosAbiertos, boolean activo) {
+    /** Constructor completo para el listado. */
+    public SociosDTO(Integer idSocio, String nombre, String apellidos, String email, LocalDate fechaNacimiento,
+                     LocalDate fechaAlta, boolean activo, Integer edad, Integer prestamosAbiertos) {
         this.idSocio = idSocio;
         this.nombre = nombre;
         this.apellidos = apellidos;
         this.email = email;
+        this.fechaNacimiento = fechaNacimiento;
+        this.fechaAlta = fechaAlta;
+        this.activo = activo;
         this.edad = edad;
         this.prestamosAbiertos = prestamosAbiertos;
-
-        this.activo = activo;
     }
 
+    public Integer getIdSocio() { return idSocio; }
+    public void setIdSocio(Integer idSocio) { this.idSocio = idSocio; }
 
-    public SociosDTO(int idSocio, String nombre, String apellidos, String email, boolean activo, int prestamosAbiertos) {
-        this.idSocio = idSocio;
-        this.nombre = nombre;
-        this.apellidos = apellidos;
-        this.email = email;
-        this.activo = activo;
-        this.prestamosAbiertos = prestamosAbiertos;
-    }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public int getIdSocio() {
-        return idSocio;
-    }
+    public String getApellidos() { return apellidos; }
+    public void setApellidos(String apellidos) { this.apellidos = apellidos; }
 
-    public void setIdSocio(int idSocio) {
-        this.idSocio = idSocio;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getNombre() {
-        return nombre;
-    }
+    public LocalDate getFechaNacimiento() { return fechaNacimiento; }
+    public void setFechaNacimiento(LocalDate fechaNacimiento) { this.fechaNacimiento = fechaNacimiento; }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+    public LocalDate getFechaAlta() { return fechaAlta; }
+    public void setFechaAlta(LocalDate fechaAlta) { this.fechaAlta = fechaAlta; }
 
-    public String getApellidos() {
-        return apellidos;
-    }
+    public boolean isActivo() { return activo; }
+    public void setActivo(boolean activo) { this.activo = activo; }
 
-    public void setApellidos(String apellidos) {
-        this.apellidos = apellidos;
-    }
+    public Integer getEdad() { return edad; }
+    public void setEdad(Integer edad) { this.edad = edad; }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Integer getEdad() {
-        return edad;
-    }
-
-    public void setEdad(Integer edad) {
-        this.edad = edad;
-    }
-
-    public Integer getPrestamosAbiertos() {
-        return prestamosAbiertos;
-    }
-
-    public void setPrestamosAbiertos(Integer prestamosAbiertos) {
-        this.prestamosAbiertos = prestamosAbiertos;
-    }
-
-    public boolean isActivo() {
-        return activo;
-    }
-
-    public void setActivo(boolean activo) {
-        this.activo = activo;
-    }
-
+    public Integer getPrestamosAbiertos() { return prestamosAbiertos; }
+    public void setPrestamosAbiertos(Integer prestamosAbiertos) { this.prestamosAbiertos = prestamosAbiertos; }
 }

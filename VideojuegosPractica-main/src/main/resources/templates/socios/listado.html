@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/menu :: cabecera('Listado de socios')}"></head>
+<body>
+<nav th:replace="~{fragmentos/menu :: menu}"></nav>
+
+<h1>Listado de socios</h1>
+
+<div class="error" th:if="${error}" th:text="${error}"></div>
+
+<div class="container">
+    <div class="form">
+        <form th:action="@{/socios/listado}" method="get">
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" name="nombre" th:value="${nombre}">
+
+            <label for="apellidos">Apellidos</label>
+            <input type="text" id="apellidos" name="apellidos" th:value="${apellidos}">
+
+            <label for="email">Email</label>
+            <input type="text" id="email" name="email" th:value="${email}">
+
+            <label for="activo">Estado</label>
+            <select id="activo" name="activo">
+                <option value="">Todos</option>
+                <option value="true" th:selected="${activo != null and activo}">Activos</option>
+                <option value="false" th:selected="${activo != null and !activo}">Inactivos</option>
+            </select>
+
+            <input type="submit" value="Buscar">
+        </form>
+    </div>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Apellidos</th>
+        <th>Email</th>
+        <th>Fecha de nacimiento</th>
+        <th>Edad</th>
+        <th>Fecha de alta</th>
+        <th>Activo</th>
+        <th>Préstamos abiertos</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="s : ${listaSocios}">
+        <td th:text="${s.idSocio}"></td>
+        <td th:text="${s.nombre}"></td>
+        <td th:text="${s.apellidos}"></td>
+        <td th:text="${s.email}"></td>
+        <td th:text="${s.fechaNacimiento}"></td>
+        <td th:text="${s.edad}"></td>
+        <td th:text="${s.fechaAlta}"></td>
+        <td th:text="${s.activo} ? 'Sí' : 'No'"></td>
+        <td th:text="${s.prestamosAbiertos}"></td>
+    </tr>
+    <tr th:if="${error == null and #lists.isEmpty(listaSocios)}">
+        <td colspan="9">No se han encontrado socios con esos filtros.</td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

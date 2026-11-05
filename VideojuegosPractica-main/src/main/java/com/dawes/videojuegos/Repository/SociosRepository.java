@@ -3,104 +3,118 @@ package com.dawes.videojuegos.Repository;
 import com.dawes.videojuegos.DTO.SociosDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.Period;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 @Repository
 public class SociosRepository {
-
     private static final Logger logger = LoggerFactory.getLogger(SociosRepository.class);
-
     private final DataSource dataSource;
 
     public SociosRepository(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
-    public Integer obtenerEdadSocio(Integer idSocio) {
-        String sql = "SELECT fecha_nacimiento FROM socios WHERE id_socio = ?";
+    public ArrayList<SociosDTO> listarSocios(String nombre, String apellidos, String email, Boolean activo) throws SQLException {
+        StringBuilder sql = new StringBuilder(
+                "SELECT s.id, s.nombre, s.apellidos, s.email, s.fecha_nacimiento, "
+                        + "s.fecha_alta AS fechaAlta, s.activo, "
+                        + "TIMESTAMPDIFF(YEAR, s.fecha_nacimiento, CURDATE()) AS edad, "
+                        + "(SELECT COUNT(*) FROM prestamos p "
+                        + "WHERE p.id_socio = s.id AND p.fecha_devolucion IS NULL) AS prestamosAbiertos  "
+                        + "FROM socios s WHERE 1 = 1");
+        ArrayList<Object> parametros = new ArrayList<>();
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        if (nombre != null && !nombre.trim().isEmpty()) {
+            sql.append(" AND s.nombre LIKE ?");
+            parametros.add("%" + nombre.trim() + "%");
+        }
+        if (apellidos != null && !apellidos.trim().isEmpty()) {
+            sql.append(" AND s.apellidos LIKE ?");
+            parametros.add("%" + apellidos.trim() + "%");
+        }
+        if (email != null && !email.trim().isEmpty()) {
+            sql.append(" AND s.email LIKE ?");
+            parametros.add("%" + email.trim() + "%");
+        }
+        if (activo != null) {
+            sql.append(" AND s.activo = ?");
+            parametros.add(activo);
+        }
+        sql.append(" ORDER BY s.apellidos, s.nombre");
 
-            ps.setInt(1, idSocio);
-
+        ArrayList<SociosDTO> listaSocios = new ArrayList<>();
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            for (int i = 0; i < parametros.size(); i++) {
+                ps.setObject(i + 1, parametros.get(i));
+            }
+            logger.debug("Query a ejecutar: {}", ps);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    LocalDate fechaNacimiento = rs.getObject("fecha_nacimiento", LocalDate.class);
-                    return calcularEdad(fechaNacimiento);
+                while (rs.next()) {
+                    listaSocios.add(mapearSocio(rs));
                 }
             }
-        } catch (SQLException e) {
-            logger.error("Error al obtener la edad del socio con id {}", idSocio, e);
         }
-
-        return null;
+        return listaSocios;
     }
 
-    public int contarPrestamosAbiertos(Integer idSocio) {
-        String sql = "SELECT COUNT(*) FROM prestamos "
-                + "WHERE id_socio = ? AND fecha_devolucion IS NULL";
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, idSocio);
-
+    public boolean existeEmail(String email) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM socios WHERE email = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
-                return rs.next() ? rs.getInt(1) : 0;
+                return rs.next() && rs.getInt(1) > 0;
             }
-        } catch (SQLException e) {
-            logger.error("Error al contar los préstamos abiertos del socio {}", idSocio, e);
-            throw new RuntimeException("Error al contar los préstamos abiertos del socio " + idSocio, e);
         }
     }
 
-    public ArrayList<SociosDTO> listarSocios() {
-        String sql = "SELECT s.id_socio, s.nombre, s.apellidos, s.email, s.activo, s.fecha_nacimiento, "
-                + "       COUNT(p.id_prestamo) AS prestamos_abiertos "
-                + "FROM socios s "
-                + "LEFT JOIN prestamos p "
-                + "       ON p.id_socio = s.id_socio AND p.fecha_devolucion IS NULL "
-                + "GROUP BY s.id_socio, s.nombre, s.apellidos, s.email, s.activo, s.fecha_nacimiento "
-                + "ORDER BY s.nombre";
+    public int insertarSocio(SociosDTO socio) throws SQLException {
+        String sql = "INSERT INTO socios (nombre, apellidos, email, fecha_nacimiento, fecha_alta, activo) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
 
-        ArrayList<SociosDTO> socios = new ArrayList<>();
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+            ps.setString(1, socio.getNombre());
+            ps.setString(2, socio.getApellidos());
+            ps.setString(3, socio.getEmail());
+            ps.setDate(4, Date.valueOf(socio.getFechaNacimiento()));
+            ps.setDate(5, Date.valueOf(socio.getFechaAlta()));
+            ps.setBoolean(6, socio.isActivo());
 
-            while (rs.next()) {
-                socios.add(new SociosDTO(
-                        rs.getInt("id_socio"),
-                        rs.getString("nombre"),
-                        rs.getString("apellidos"),
-                        rs.getString("email"),
-                        rs.getBoolean("activo"),
-                        rs.getInt("prestamos_abiertos")
-                ));
+            logger.debug("Query a ejecutar: {}", ps);
+            ps.executeUpdate();
+
+            try (ResultSet claves = ps.getGeneratedKeys()) {
+                if (claves.next()) {
+                    return claves.getInt(1);
+                }
             }
-            return socios;
-
-        } catch (SQLException e) {
-            logger.error("Error al listar los socios", e);
-            throw new RuntimeException("Error al listar los socios", e);
         }
+        throw new SQLException("La base de datos no ha devuelto el id del socio insertado");
     }
 
-    private Integer calcularEdad(LocalDate fechaNacimiento) {
-        if (fechaNacimiento == null) {
-            return null;
-        }
-        return Period.between(fechaNacimiento, LocalDate.now()).getYears();
-    }}
+    private SociosDTO mapearSocio(ResultSet rs) throws SQLException {
+        return new SociosDTO(
+                rs.getInt("id"),
+                rs.getString("nombre"),
+                rs.getString("apellidos"),
+                rs.getString("email"),
+                rs.getDate("fecha_nacimiento").toLocalDate(),
+                rs.getDate("fechaAlta").toLocalDate(),
+                rs.getBoolean("activo"),
+                rs.getInt("edad"),
+                rs.getInt("prestamosAbiertos")
+        );
+    }
+}
