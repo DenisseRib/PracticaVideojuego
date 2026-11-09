@@ -25,7 +25,6 @@ public class SociosDTO {
         this.fechaNacimiento = fechaNacimiento;
     }
 
-    /** Constructor completo para el listado. */
     public SociosDTO(Integer idSocio, String nombre, String apellidos, String email, LocalDate fechaNacimiento,
                      LocalDate fechaAlta, boolean activo, Integer edad, Integer prestamosAbiertos) {
         this.idSocio = idSocio;

@@ -1,5 +1,6 @@
 package com.dawes.videojuegos.impl;
 
+import com.dawes.videojuegos.DTO.DesplegableDTO;
 import com.dawes.videojuegos.DTO.SociosDTO;
 import com.dawes.videojuegos.Repository.SociosRepository;
 import com.dawes.videojuegos.interfaz.ISociosDAO;
@@ -19,6 +20,16 @@ public class SociosDAO implements ISociosDAO {
 	@Override
 	public ArrayList<SociosDTO> listarSocios(String nombre, String apellidos, String email, Boolean activo) throws SQLException {
 		return sociosRepository.listarSocios(nombre, apellidos, email, activo);
+	}
+
+	@Override
+	public SociosDTO buscarSocio(int idSocio) throws SQLException {
+		return sociosRepository.buscarSocio(idSocio);
+	}
+
+	@Override
+	public ArrayList<DesplegableDTO> listarActivosDesplegable() throws SQLException {
+		return sociosRepository.listarActivosDesplegable();
 	}
 
 	@Override

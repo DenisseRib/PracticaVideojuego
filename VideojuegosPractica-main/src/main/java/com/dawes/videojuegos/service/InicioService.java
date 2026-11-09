@@ -15,8 +15,8 @@ public class InicioService {
 		this.inicioDAO = inicioDAO;
 	}
 
-	/** "Vencido" = préstamo abierto con fecha límite anterior a hoy; el Service decide qué es "hoy". */
 	public ContadoresInicioDTO obtenerContadores() throws SQLException {
 		return inicioDAO.obtenerContadores(LocalDate.now());
 	}
+
 }

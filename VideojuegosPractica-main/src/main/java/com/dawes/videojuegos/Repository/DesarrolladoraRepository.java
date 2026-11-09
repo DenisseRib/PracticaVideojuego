@@ -18,7 +18,6 @@ public class DesarrolladoraRepository {
 		this.dataSource = dataSource;
 	}
 
-	/** Desarrolladoras para rellenar el desplegable (id + nombre), ordenadas por nombre. */
 	public ArrayList<DesplegableDTO> listarDesplegable() throws SQLException {
 		String sql = "SELECT id, nombre FROM desarrolladoras ORDER BY nombre";
 		ArrayList<DesplegableDTO> listaDesarrolladoras = new ArrayList<>();

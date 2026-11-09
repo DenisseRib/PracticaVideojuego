@@ -74,7 +74,6 @@ public class VideojuegoControlador {
 			VideojuegoDTO videojuego = new VideojuegoDTO(titulo, anioLanzamiento, pegi, idDesarrolladora);
 			int idNuevo = videojuegoService.insertarVideojuego(videojuego);
 
-			// Redirect + flash: el mensaje se ve en la página y, si el usuario recarga (F5), no se vuelve a insertar
 			redirectAttributes.addFlashAttribute("mensajeOk",
 					"Videojuego '" + videojuego.getTitulo() + "' insertado correctamente (id " + idNuevo + ")");
 			return "redirect:/videojuegos/insertar";
@@ -83,7 +82,6 @@ public class VideojuegoControlador {
 			model.addAttribute("error", e.getMessage());
 		}
 
-        // Si algo ha fallado se vuelve al formulario conservando lo que el usuario había escrito
 		model.addAttribute("titulo", titulo);
 		model.addAttribute("anioLanzamiento", anioLanzamiento);
 		model.addAttribute("pegi", pegi);

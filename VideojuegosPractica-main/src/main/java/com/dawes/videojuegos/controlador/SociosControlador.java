@@ -2,6 +2,7 @@ package com.dawes.videojuegos.controlador;
 
 import com.dawes.videojuegos.DTO.SociosDTO;
 import com.dawes.videojuegos.service.SociosService;
+import com.dawes.videojuegos.service.ValidacionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -73,11 +74,10 @@ public class SociosControlador {
 		} catch (SQLException e) {
 			logger.error("Error al insertar el socio", e);
 			model.addAttribute("error", MENSAJE_ERROR_BBDD);
-		} catch (Exception e) {
+		} catch (ValidacionException e) {
 			model.addAttribute("error", e.getMessage());
 		}
 
-		// Si algo ha fallado se vuelve al formulario conservando lo que el usuario había escrito
 		model.addAttribute("nombre", nombre);
 		model.addAttribute("apellidos", apellidos);
 		model.addAttribute("email", email);

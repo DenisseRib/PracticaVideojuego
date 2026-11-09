@@ -11,8 +11,8 @@ import java.util.regex.Pattern;
 
 @Service
 public class SociosService {
-	private static final int LONGITUD_MAXIMA_NOMBRE = 50;
-	private static final int LONGITUD_MAXIMA_APELLIDOS = 100;
+	private static final int LONGITUD_MAXIMA_NOMBRE = 40;
+	private static final int LONGITUD_MAXIMA_APELLIDOS = 80;
 	private static final int LONGITUD_MAXIMA_EMAIL = 100;
 	private static final Pattern PATRON_EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
@@ -49,14 +49,14 @@ public class SociosService {
 		} else if (email.length() > LONGITUD_MAXIMA_EMAIL || !PATRON_EMAIL.matcher(email).matches()) {
 			errores.add("El email no tiene un formato válido.");
 		} else if (sociosDAO.existeEmail(email)) {
-			errores.add("Ya existe un socio con ese email.");
+			errores.add("Ya existe un socio con el email " + email);
 		}
 
 		LocalDate fechaNacimiento = socio.getFechaNacimiento();
 		if (fechaNacimiento == null) {
 			errores.add("La fecha de nacimiento es obligatoria.");
-		} else if (!fechaNacimiento.isBefore(LocalDate.now())) {
-			errores.add("La fecha de nacimiento debe ser anterior a hoy.");
+		} else if (fechaNacimiento.isAfter(LocalDate.now())) {
+			errores.add("La fecha de nacimiento no puede ser futura.");
 		}
 
 		if (!errores.isEmpty()) {

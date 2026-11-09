@@ -1,5 +1,6 @@
 package com.dawes.videojuegos.Repository;
 
+import com.dawes.videojuegos.DTO.DesplegableDTO;
 import com.dawes.videojuegos.DTO.SociosDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,13 @@ import java.util.ArrayList;
 @Repository
 public class SociosRepository {
     private static final Logger logger = LoggerFactory.getLogger(SociosRepository.class);
+    private static final String SQL_SELECT_SOCIOS =
+            "SELECT s.id, s.nombre, s.apellidos, s.email, s.fecha_nacimiento, "
+                    + "s.fecha_alta AS fechaAlta, s.activo, "
+                    + "TIMESTAMPDIFF(YEAR, s.fecha_nacimiento, CURDATE()) AS edad, "
+                    + "(SELECT COUNT(*) FROM prestamos p "
+                    + "WHERE p.id_socio = s.id AND p.fecha_devolucion IS NULL) AS prestamosAbiertos "
+                    + "FROM socios s";
     private final DataSource dataSource;
 
     public SociosRepository(DataSource dataSource) {
@@ -24,13 +32,7 @@ public class SociosRepository {
     }
 
     public ArrayList<SociosDTO> listarSocios(String nombre, String apellidos, String email, Boolean activo) throws SQLException {
-        StringBuilder sql = new StringBuilder(
-                "SELECT s.id, s.nombre, s.apellidos, s.email, s.fecha_nacimiento, "
-                        + "s.fecha_alta AS fechaAlta, s.activo, "
-                        + "TIMESTAMPDIFF(YEAR, s.fecha_nacimiento, CURDATE()) AS edad, "
-                        + "(SELECT COUNT(*) FROM prestamos p "
-                        + "WHERE p.id_socio = s.id AND p.fecha_devolucion IS NULL) AS prestamosAbiertos  "
-                        + "FROM socios s WHERE 1 = 1");
+        StringBuilder sql = new StringBuilder(SQL_SELECT_SOCIOS + " WHERE 1 = 1");
         ArrayList<Object> parametros = new ArrayList<>();
 
         if (nombre != null && !nombre.trim().isEmpty()) {
@@ -62,6 +64,34 @@ public class SociosRepository {
                 while (rs.next()) {
                     listaSocios.add(mapearSocio(rs));
                 }
+            }
+        }
+        return listaSocios;
+    }
+
+    /** Devuelve el socio (con edad y préstamos abiertos) o null si no existe. */
+    public SociosDTO buscarSocio(int idSocio) throws SQLException {
+        String sql = SQL_SELECT_SOCIOS + " WHERE s.id = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, idSocio);
+            logger.debug("Query a ejecutar: {}", ps);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? mapearSocio(rs) : null;
+            }
+        }
+    }
+
+    /** Socios activos (id + nombre completo) para el desplegable de registrar préstamo. */
+    public ArrayList<DesplegableDTO> listarActivosDesplegable() throws SQLException {
+        String sql = "SELECT id, CONCAT(nombre, ' ', apellidos) AS nombreCompleto "
+                + "FROM socios WHERE activo = 1 ORDER BY apellidos, nombre";
+        ArrayList<DesplegableDTO> listaSocios = new ArrayList<>();
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                listaSocios.add(new DesplegableDTO(rs.getInt("id"), rs.getString("nombreCompleto")));
             }
         }
         return listaSocios;
