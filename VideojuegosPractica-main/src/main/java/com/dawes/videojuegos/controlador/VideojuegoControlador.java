@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import com.dawes.videojuegos.service.ValidacionException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -78,8 +78,11 @@ public class VideojuegoControlador {
 					"Videojuego '" + videojuego.getTitulo() + "' insertado correctamente (id " + idNuevo + ")");
 			return "redirect:/videojuegos/insertar";
 
-		} catch (Exception e) {
+		} catch (ValidacionException e) {
 			model.addAttribute("error", e.getMessage());
+		} catch (SQLException e) {
+			logger.error("Error al insertar el videojuego", e);
+			model.addAttribute("error", MENSAJE_ERROR_BBDD);
 		}
 
 		model.addAttribute("titulo", titulo);
@@ -87,7 +90,6 @@ public class VideojuegoControlador {
 		model.addAttribute("pegi", pegi);
 		model.addAttribute("idDesarrolladora", idDesarrolladora);
 		cargarDesplegablesInsertar(model);
-
 
 		return "videojuegos/insertar";
 	}
