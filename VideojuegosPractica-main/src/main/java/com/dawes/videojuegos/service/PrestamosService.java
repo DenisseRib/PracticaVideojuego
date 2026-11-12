@@ -94,19 +94,19 @@ public class PrestamosService {
 		ArrayList<String> reglasIncumplidas = new ArrayList<>();
 
 		if (!socio.isActivo()) {
-			reglasIncumplidas.add("El socio no está activo.");
+			reglasIncumplidas.add("RN-1: El socio no está activo.");
 		}
 		if (!copia.isActiva() || copia.getPrestamosAbiertos() > 0) {
-			reglasIncumplidas.add("La copia " + copia.getCodigoInventario() + " no está disponible (inactiva o ya prestada).");
+			reglasIncumplidas.add("RN-2: La copia " + copia.getCodigoInventario() + " no está disponible (inactiva o ya prestada).");
 		}
 		if (socio.getPrestamosAbiertos() >= MAXIMO_PRESTAMOS_ABIERTOS) {
-			reglasIncumplidas.add("El socio ya tiene " + MAXIMO_PRESTAMOS_ABIERTOS + " préstamos abiertos.");
+			reglasIncumplidas.add("RN-3: El socio ya tiene " + MAXIMO_PRESTAMOS_ABIERTOS + " préstamos abiertos.");
 		}
 		if (socio.getEdad() < copia.getPegi()) {
-			reglasIncumplidas.add("El socio tiene " + socio.getEdad() + " años y el juego es PEGI " + copia.getPegi() + ".");
+			reglasIncumplidas.add("RN-4: El socio tiene " + socio.getEdad() + " años y el juego es PEGI " + copia.getPegi() + ".");
 		}
 		if (prestamosDAO.contarPrestamosVencidosSocio(idSocio, hoy) > 0) {
-			reglasIncumplidas.add("El socio tiene préstamos vencidos sin devolver.");
+			reglasIncumplidas.add("RN-5: El socio tiene préstamos vencidos sin devolver.");
 		}
 
 		if (!reglasIncumplidas.isEmpty()) {
