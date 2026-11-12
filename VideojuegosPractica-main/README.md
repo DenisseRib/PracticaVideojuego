@@ -34,5 +34,20 @@ y se muestran en la propia página.
 ## Funcionalidades implementadas
 
 - **RF-01** Listado de videojuegos con filtros opcionales y combinables (título, desarrolladora, año desde, PEGI máximo, solo con copias disponibles)
-- **RF-02** Alta de videojuego con validaciones
+- **RF-02** Alta de videojuego con validaciones (título, año entre 1970 y el actual, PEGI válido)
+- **RF-03** Listado de socios con filtros (nombre o apellidos, email, activo sí/no/todos), edad y préstamos abiertos
+- **RF-04** Alta de socio (fecha de alta de hoy, activo, email único, datos obligatorios)
+- **RF-05** Registro de préstamo con las reglas RN-1 a RN-5 en el Service y fecha límite según novedad (7 días) o normal (15 días)
+- **RF-06** Listado de préstamos con filtros (socio, juego, estado, fecha desde) y estado calculado EN_PLAZO / VENCIDO / DEVUELTO con días de retraso
+- **RF-07** Devolución de préstamos con multa de 0,50 €/día de retraso y opción de copia dañada, en una única transacción con `rollback`
 - **RF-08** Inicio con los contadores (videojuegos, socios activos, préstamos abiertos y vencidos)
+
+## Reglas de negocio (Service)
+
+| Id | Regla |
+|----|-------|
+| RN-1 | El socio debe estar activo |
+| RN-2 | La copia debe estar disponible (activa y sin préstamo abierto) |
+| RN-3 | Un socio no puede tener más de 3 préstamos abiertos |
+| RN-4 | La edad del socio debe ser mayor o igual que el PEGI del juego |
+| RN-5 | Un socio con un préstamo vencido sin devolver no puede pedir otro |
