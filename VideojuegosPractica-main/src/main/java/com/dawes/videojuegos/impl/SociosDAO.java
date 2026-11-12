@@ -18,8 +18,8 @@ public class SociosDAO implements ISociosDAO {
 	}
 
 	@Override
-	public ArrayList<SociosDTO> listarSocios(String nombre, String apellidos, String email, Boolean activo) throws SQLException {
-		return sociosRepository.listarSocios(nombre, apellidos, email, activo);
+	public ArrayList<SociosDTO> listarSocios(String nombreOApellidos, String email, Boolean activo) throws SQLException {
+		return sociosRepository.listarSocios(nombreOApellidos, email, activo);
 	}
 
 	@Override

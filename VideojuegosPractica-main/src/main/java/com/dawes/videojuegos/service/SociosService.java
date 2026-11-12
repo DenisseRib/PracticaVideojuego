@@ -22,10 +22,9 @@ public class SociosService {
 		this.sociosDAO = sociosDAO;
 	}
 
-	public ArrayList<SociosDTO> listarSocios(String nombre, String apellidos, String email, Boolean activo) throws SQLException {
-		return sociosDAO.listarSocios(limpiar(nombre), limpiar(apellidos), limpiar(email), activo);
+	public ArrayList<SociosDTO> listarSocios(String nombreOApellidos, String email, Boolean activo) throws SQLException {
+		return sociosDAO.listarSocios(limpiar(nombreOApellidos), limpiar(email), activo);
 	}
-
 	public int insertarSocio(SociosDTO socio) throws SQLException, ValidacionException {
 		ArrayList<String> errores = new ArrayList<>();
 

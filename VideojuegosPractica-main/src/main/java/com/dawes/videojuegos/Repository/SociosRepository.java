@@ -31,17 +31,13 @@ public class SociosRepository {
         this.dataSource = dataSource;
     }
 
-    public ArrayList<SociosDTO> listarSocios(String nombre, String apellidos, String email, Boolean activo) throws SQLException {
+    public ArrayList<SociosDTO> listarSocios(String nombreOApellidos, String email, Boolean activo) throws SQLException {
         StringBuilder sql = new StringBuilder(SQL_SELECT_SOCIOS + " WHERE 1 = 1");
         ArrayList<Object> parametros = new ArrayList<>();
 
-        if (nombre != null && !nombre.trim().isEmpty()) {
-            sql.append(" AND s.nombre LIKE ?");
-            parametros.add("%" + nombre.trim() + "%");
-        }
-        if (apellidos != null && !apellidos.trim().isEmpty()) {
-            sql.append(" AND s.apellidos LIKE ?");
-            parametros.add("%" + apellidos.trim() + "%");
+        if (nombreOApellidos != null && !nombreOApellidos.trim().isEmpty()) {
+            sql.append(" AND CONCAT(s.nombre, ' ', s.apellidos) LIKE ?");
+            parametros.add("%" + nombreOApellidos.trim() + "%");
         }
         if (email != null && !email.trim().isEmpty()) {
             sql.append(" AND s.email LIKE ?");

@@ -31,19 +31,17 @@ public class SociosControlador {
 	}
 
 	@GetMapping("/listado")
-	public String listado(@RequestParam(required = false) String nombre,
-	                      @RequestParam(required = false) String apellidos,
+	public String listado(@RequestParam(required = false) String nombreOApellidos,
 	                      @RequestParam(required = false) String email,
 	                      @RequestParam(required = false) Boolean activo,
 	                      Model model) {
 
-		model.addAttribute("nombre", nombre);
-		model.addAttribute("apellidos", apellidos);
+		model.addAttribute("nombreOApellidos", nombreOApellidos);
 		model.addAttribute("email", email);
 		model.addAttribute("activo", activo);
 
 		try {
-			model.addAttribute("listaSocios", sociosService.listarSocios(nombre, apellidos, email, activo));
+			model.addAttribute("listaSocios", sociosService.listarSocios(nombreOApellidos, email, activo));
 		} catch (SQLException e) {
 			logger.error("Error al listar los socios", e);
 			model.addAttribute("listaSocios", new ArrayList<SociosDTO>());

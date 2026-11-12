@@ -8,8 +8,7 @@ import java.util.ArrayList;
 
 public interface ISociosDAO {
 
-	ArrayList<SociosDTO> listarSocios(String nombre, String apellidos, String email, Boolean activo) throws SQLException;
-
+	ArrayList<SociosDTO> listarSocios(String nombreOApellidos, String email, Boolean activo) throws SQLException;
 	SociosDTO buscarSocio(int idSocio) throws SQLException;
 
 	ArrayList<DesplegableDTO> listarActivosDesplegable() throws SQLException;
