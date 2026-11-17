@@ -2,6 +2,7 @@ package com.dawes.videojuegos.controlador;
 
 
 import com.dawes.videojuegos.DTO.PrestamosDTO;
+import com.dawes.videojuegos.DTO.VideojuegoMasPrestadoDTO;
 
 import com.dawes.videojuegos.service.PrestamosService;
 import com.dawes.videojuegos.service.ValidacionException;
@@ -35,22 +36,32 @@ public class PrestamosControlador {
 	@GetMapping("/listado")
 	public String listado(@RequestParam(required = false) String socio,
 	                      @RequestParam(required = false) String videojuego,
+	                      @RequestParam(required = false) Integer idPlataforma,
 	                      @RequestParam(required = false) String estado,
 	                      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
 	                      Model model) {
 		model.addAttribute("socio", socio);
 		model.addAttribute("videojuego", videojuego);
+		model.addAttribute("idPlataforma", idPlataforma);
 		model.addAttribute("estado", estado);
 		model.addAttribute("fechaDesde", fechaDesde);
 		try {
-			model.addAttribute("listaPrestamos", prestamosService.listarPrestamos(socio, videojuego, estado, fechaDesde));
+			model.addAttribute("listaPlataformas", prestamosService.listarPlataformas());
+			model.addAttribute("listaPrestamos", prestamosService.listarPrestamos(socio, videojuego, idPlataforma, estado, fechaDesde));
 		} catch (ValidacionException e) {
 			model.addAttribute("listaPrestamos", new ArrayList<PrestamosDTO>());
 			model.addAttribute("error", e.getMessage());
 		} catch (SQLException e) {
 			logger.error("Error al listar los préstamos", e);
+			model.addAttribute("listaPlataformas", new ArrayList<>());
 			model.addAttribute("listaPrestamos", new ArrayList<PrestamosDTO>());
 			model.addAttribute("error", MENSAJE_ERROR_BBDD);
+		}
+		try {
+			model.addAttribute("listaMasPrestados", prestamosService.listarVideojuegosMasPrestados());
+		} catch (SQLException e) {
+			logger.error("Error al listar los videojuegos más prestados", e);
+			model.addAttribute("listaMasPrestados", new ArrayList<VideojuegoMasPrestadoDTO>());
 		}
 		return "prestamos/listado";
 	}
@@ -108,6 +119,46 @@ public class PrestamosControlador {
 			model.addAttribute("error", MENSAJE_ERROR_BBDD);
 		}
 		return "prestamos/devolver";
+	}
+	@PostMapping("/renovar")
+	public String renovar(@RequestParam(required = false) Integer idPrestamo,
+	                      @RequestParam(required = false) String origen,
+	                      @RequestParam(required = false) String socio,
+	                      @RequestParam(required = false) String videojuego,
+	                      @RequestParam(required = false) Integer idPlataforma,
+	                      @RequestParam(required = false) String estado,
+	                      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
+	                      RedirectAttributes redirectAttributes) {
+		try {
+			redirectAttributes.addFlashAttribute("prestamoRenovado", prestamosService.renovarPrestamo(idPrestamo));
+		} catch (ValidacionException e) {
+			redirectAttributes.addFlashAttribute("error", e.getMessage());
+		} catch (SQLException e) {
+			logger.error("Error al renovar el préstamo", e);
+			redirectAttributes.addFlashAttribute("error", MENSAJE_ERROR_BBDD);
+		}
+		if ("listado".equals(origen)) {
+			if (socio != null && !socio.isBlank()) {
+				redirectAttributes.addAttribute("socio", socio);
+			}
+			if (videojuego != null && !videojuego.isBlank()) {
+				redirectAttributes.addAttribute("videojuego", videojuego);
+			}
+			if (idPlataforma != null) {
+				redirectAttributes.addAttribute("idPlataforma", idPlataforma);
+			}
+			if (estado != null && !estado.isBlank()) {
+				redirectAttributes.addAttribute("estado", estado);
+			}
+			if (fechaDesde != null) {
+				redirectAttributes.addAttribute("fechaDesde", fechaDesde);
+			}
+			return "redirect:/prestamos/listado";
+		}
+		if (socio != null && !socio.isBlank()) {
+			redirectAttributes.addAttribute("socio", socio);
+		}
+		return "redirect:/prestamos/devolver";
 	}
 
 	@PostMapping("/devolver")
