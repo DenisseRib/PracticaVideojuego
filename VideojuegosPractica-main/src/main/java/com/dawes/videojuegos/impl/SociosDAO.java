@@ -41,4 +41,8 @@ public class SociosDAO implements ISociosDAO {
 	public int insertarSocio(SociosDTO socio) throws SQLException {
 		return sociosRepository.insertarSocio(socio);
 	}
+	@Override
+	public SociosDTO  buscarSocioPorId(int id) throws SQLException {
+		return sociosRepository.buscarSocioPorId(id);
+	}
 }

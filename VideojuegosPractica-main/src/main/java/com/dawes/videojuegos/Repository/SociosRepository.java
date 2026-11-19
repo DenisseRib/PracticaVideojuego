@@ -65,7 +65,6 @@ public class SociosRepository {
         return listaSocios;
     }
 
-    /** Devuelve el socio (con edad y préstamos abiertos) o null si no existe. */
     public SociosDTO buscarSocio(int idSocio) throws SQLException {
         String sql = SQL_SELECT_SOCIOS + " WHERE s.id = ?";
         try (Connection connection = dataSource.getConnection();
@@ -78,7 +77,6 @@ public class SociosRepository {
         }
     }
 
-    /** Socios activos (id + nombre completo) para el desplegable de registrar préstamo. */
     public ArrayList<DesplegableDTO> listarActivosDesplegable() throws SQLException {
         String sql = "SELECT id, CONCAT(nombre, ' ', apellidos) AS nombreCompleto "
                 + "FROM socios WHERE activo = 1 ORDER BY apellidos, nombre";
@@ -129,6 +127,23 @@ public class SociosRepository {
         }
         throw new SQLException("La base de datos no ha devuelto el id del socio insertado");
     }
+    public SociosDTO buscarSocioPorId(int id) throws SQLException {
+        String sql = SQL_SELECT_SOCIOS + " WHERE s.id = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            logger.debug("Query a ejecutar: {}", ps);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapearSocio(rs);
+                }
+            }
+        }
+        return null;
+    }
+
 
     private SociosDTO mapearSocio(ResultSet rs) throws SQLException {
         return new SociosDTO(

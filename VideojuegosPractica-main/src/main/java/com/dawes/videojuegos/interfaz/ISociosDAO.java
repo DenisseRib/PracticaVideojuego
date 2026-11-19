@@ -12,7 +12,7 @@ public interface ISociosDAO {
 	SociosDTO buscarSocio(int idSocio) throws SQLException;
 
 	ArrayList<DesplegableDTO> listarActivosDesplegable() throws SQLException;
-
+	public SociosDTO  buscarSocioPorId( int id) throws SQLException;
 	boolean existeEmail(String email) throws SQLException;
 
 	int insertarSocio(SociosDTO socio) throws SQLException;

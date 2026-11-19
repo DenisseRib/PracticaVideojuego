@@ -32,4 +32,16 @@ public class DesarrolladoraRepository {
 		}
 		return listaDesarrolladoras;
 	}
+	public boolean existeDesarrolladora(int id) throws SQLException {
+		String sql = "SELECT 1 FROM desarrolladoras WHERE id = ?";
+
+		try (Connection connection = dataSource.getConnection();
+		     PreparedStatement ps = connection.prepareStatement(sql)) {
+
+			ps.setInt(1, id);
+			try (ResultSet rs = ps.executeQuery()) {
+				return rs.next();
+			}
+		}
+	}
 }

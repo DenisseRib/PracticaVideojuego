@@ -7,4 +7,6 @@ import java.util.ArrayList;
 
 public interface IDesarrolladoraDAO {
 	ArrayList<DesplegableDTO> listarDesplegable() throws SQLException;
+
+	boolean existeDesarrolladora(int id) throws SQLException;
 }

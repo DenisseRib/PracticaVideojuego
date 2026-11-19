@@ -23,6 +23,11 @@ public class CopiasDAO implements ICopiasDAO {
 	}
 
 	@Override
+	public ArrayList<CopiaDTO> listarCopias(String titulo, Integer idPlataforma, String estado) throws SQLException {
+		return copiasRepository.listarCopias(titulo, idPlataforma, estado);
+	}
+
+	@Override
 	public CopiaDTO buscarCopia(int idCopia) throws SQLException {
 		return copiasRepository.buscarCopia(idCopia);
 	}

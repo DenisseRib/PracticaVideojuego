@@ -1,4 +1,4 @@
-package com.dawes.videojuegos.controlador;
+package com.dawes.videojuegos.controlador.thymeleaf;
 
 import com.dawes.videojuegos.DTO.VideojuegoDTO;
 import com.dawes.videojuegos.service.VideojuegoService;
@@ -34,7 +34,7 @@ public class VideojuegoControlador {
 	                      @RequestParam(required = false) Integer idDesarrolladora,
 	                      @RequestParam(required = false) Integer anioDesde,
 	                      @RequestParam(required = false) Integer pegiMax,
-	                      @RequestParam(defaultValue = "false") boolean soloDisponibles,
+	                      @RequestParam(defaultValue = "false") Boolean soloDisponibles,
 	                      Model model) {
 
 		model.addAttribute("titulo", titulo);

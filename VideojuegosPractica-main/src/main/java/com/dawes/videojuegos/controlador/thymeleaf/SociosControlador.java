@@ -1,4 +1,4 @@
-package com.dawes.videojuegos.controlador;
+package com.dawes.videojuegos.controlador.thymeleaf;
 
 import com.dawes.videojuegos.DTO.SociosDTO;
 import com.dawes.videojuegos.service.SociosService;

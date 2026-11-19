@@ -20,4 +20,9 @@ public class DesarrolladoraDAO implements IDesarrolladoraDAO {
 	public ArrayList<DesplegableDTO> listarDesplegable() throws SQLException {
 		return desarrolladoraRepository.listarDesplegable();
 	}
+
+	@Override
+	public boolean existeDesarrolladora(int id) throws SQLException {
+		return desarrolladoraRepository.existeDesarrolladora(id);
+	}
 }

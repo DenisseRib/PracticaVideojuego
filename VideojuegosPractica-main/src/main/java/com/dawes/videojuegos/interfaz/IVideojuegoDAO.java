@@ -7,7 +7,9 @@ import java.util.ArrayList;
 
 public interface IVideojuegoDAO {
 	ArrayList<VideojuegoDTO> buscarVideojuegos(String titulo, Integer idDesarrolladora, Integer anioDesde,
-	                                           Integer pegiMax, boolean soloDisponibles) throws SQLException;
+	                                           Integer pegiMax, Boolean soloDisponibles) throws SQLException;
 
 	int insertarVideojuego(VideojuegoDTO videojuego) throws SQLException;
+
+	VideojuegoDTO buscarVideojuegoPorId(int id) throws SQLException;
 }

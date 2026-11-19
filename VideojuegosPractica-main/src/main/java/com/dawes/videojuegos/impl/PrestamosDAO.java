@@ -3,6 +3,7 @@ package com.dawes.videojuegos.impl;
 
 import com.dawes.videojuegos.DTO.PrestamosDTO;
 
+import com.dawes.videojuegos.DTO.VideojuegoMasPrestadoDTO;
 import com.dawes.videojuegos.Repository.PrestamosRepository;
 
 import com.dawes.videojuegos.interfaz.IPrestamosDAO;
@@ -22,9 +23,9 @@ public class PrestamosDAO implements IPrestamosDAO {
 	}
 
 	@Override
-	public ArrayList<PrestamosDTO> listarPrestamos(String socio, String videojuego, String estado,
-	                                               LocalDate fechaDesde, LocalDate hoy) throws SQLException {
-		return prestamosRepository.listarPrestamos(socio, videojuego, estado, fechaDesde, hoy);
+	public ArrayList<PrestamosDTO> listarPrestamos(String socio, String videojuego, Integer idPlataforma, String estado, LocalDate fechaDesde,
+	                                        LocalDate hoy) throws SQLException {
+		return prestamosRepository.listarPrestamos(socio, videojuego, idPlataforma, estado, fechaDesde, hoy);
 	}
 
 	@Override
@@ -46,5 +47,13 @@ public class PrestamosDAO implements IPrestamosDAO {
 	public void devolverPrestamo(int idPrestamo, int idCopia, LocalDate fechaDevolucion, BigDecimal multa,
 	                             boolean copiaDanada) throws SQLException {
 		prestamosRepository.devolverPrestamo(idPrestamo, idCopia, fechaDevolucion, multa, copiaDanada);
+	}
+	@Override
+	public void renovarPrestamo(int idPrestamo, LocalDate nuevaFechaLimite) throws SQLException {
+		prestamosRepository.renovarPrestamo(idPrestamo, nuevaFechaLimite);
+	}
+	@Override
+	public ArrayList<VideojuegoMasPrestadoDTO> listarVideojuegosMasPrestados() throws SQLException {
+		return prestamosRepository.listarVideojuegosMasPrestados();
 	}
 }

@@ -18,12 +18,17 @@ public class VideojuegoDAO implements IVideojuegoDAO {
 
 	@Override
 	public ArrayList<VideojuegoDTO> buscarVideojuegos(String titulo, Integer idDesarrolladora, Integer anioDesde,
-	                                                  Integer pegiMax, boolean soloDisponibles) throws SQLException {
+	                                                  Integer pegiMax, Boolean soloDisponibles) throws SQLException {
 		return videojuegoRepository.buscarVideojuegos(titulo, idDesarrolladora, anioDesde, pegiMax, soloDisponibles);
 	}
 
 	@Override
 	public int insertarVideojuego(VideojuegoDTO videojuego) throws SQLException {
 		return videojuegoRepository.insertarVideojuego(videojuego);
+	}
+
+	@Override
+	public VideojuegoDTO buscarVideojuegoPorId(int id) throws SQLException {
+		return videojuegoRepository.buscarVideojuegoPorId(id);
 	}
 }

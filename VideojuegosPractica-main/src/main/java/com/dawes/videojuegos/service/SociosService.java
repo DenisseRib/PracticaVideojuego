@@ -1,6 +1,7 @@
 package com.dawes.videojuegos.service;
 
 import com.dawes.videojuegos.DTO.SociosDTO;
+import com.dawes.videojuegos.DTO.VideojuegoDTO;
 import com.dawes.videojuegos.interfaz.ISociosDAO;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,10 @@ public class SociosService {
 
 	public ArrayList<SociosDTO> listarSocios(String nombreOApellidos, String email, Boolean activo) throws SQLException {
 		return sociosDAO.listarSocios(limpiar(nombreOApellidos), limpiar(email), activo);
+	}
+
+	public SociosDTO buscarSocioPorId(int id) throws SQLException {
+		return sociosDAO.buscarSocioPorId(id);
 	}
 	public int insertarSocio(SociosDTO socio) throws SQLException, ValidacionException {
 		ArrayList<String> errores = new ArrayList<>();
@@ -69,8 +74,7 @@ public class SociosService {
 		socio.setActivo(true);
 		return sociosDAO.insertarSocio(socio);
 	}
-
-	private String limpiar(String texto) {
+	public String limpiar(String texto) {
 		return (texto == null || texto.isBlank()) ? null : texto.trim();
 	}
 }

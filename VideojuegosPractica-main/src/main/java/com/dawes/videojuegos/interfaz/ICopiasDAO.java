@@ -9,6 +9,7 @@ import java.util.ArrayList;
 public interface ICopiasDAO {
 
 	ArrayList<DesplegableDTO> listarDisponiblesDesplegable() throws SQLException;
+	ArrayList<CopiaDTO> listarCopias(String titulo, Integer idPlataforma, String estado) throws SQLException;
 
 	CopiaDTO buscarCopia(int idCopia) throws SQLException;
 }

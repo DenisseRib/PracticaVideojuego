@@ -1,6 +1,7 @@
 package com.dawes.videojuegos.Repository;
 
 import com.dawes.videojuegos.DTO.PrestamosDTO;
+import com.dawes.videojuegos.DTO.VideojuegoMasPrestadoDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -22,7 +23,7 @@ public class PrestamosRepository {
 	private static final String SQL_SELECT_PRESTAMOS =
 			"SELECT p.id, p.id_copia, CONCAT(s.nombre, ' ', s.apellidos) AS socio, "
 					+ "v.titulo AS videojuego, pl.nombre AS plataforma, c.codigo_inventario AS codigoCopia, "
-					+ "p.fecha_prestamo, p.fecha_limite, p.fecha_devolucion, p.multa "
+					+ "p.fecha_prestamo, p.fecha_limite, p.fecha_devolucion, p.multa, p.renovaciones "
 					+ "FROM prestamos p "
 					+ "JOIN socios s ON s.id = p.id_socio "
 					+ "JOIN copias c ON c.id = p.id_copia "
@@ -35,7 +36,7 @@ public class PrestamosRepository {
 		this.dataSource = dataSource;
 	}
 
-	public ArrayList<PrestamosDTO> listarPrestamos(String socio, String videojuego, String estado,
+	public ArrayList<PrestamosDTO> listarPrestamos(String socio, String videojuego, Integer idPlataforma, String estado,
 	                                               LocalDate fechaDesde, LocalDate hoy) throws SQLException {
 		StringBuilder sql = new StringBuilder(SQL_SELECT_PRESTAMOS + "WHERE 1 = 1");
 		ArrayList<Object> parametros = new ArrayList<>();
@@ -52,6 +53,10 @@ public class PrestamosRepository {
 			sql.append(" AND p.fecha_prestamo >= ?");
 			parametros.add(Date.valueOf(fechaDesde));
 		}
+		if (idPlataforma != null) {
+			sql.append(" AND c.id_plataforma = ?");
+			parametros.add(idPlataforma);
+		}
 		if ("ABIERTOS".equals(estado)) {
 			sql.append(" AND p.fecha_devolucion IS NULL");
 		} else if ("EN_PLAZO".equals(estado)) {
@@ -67,14 +72,38 @@ public class PrestamosRepository {
 
 		ArrayList<PrestamosDTO> lista = new ArrayList<>();
 		try (Connection connection = dataSource.getConnection();
-		     PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+		     PreparedStatement sentencia = connection.prepareStatement(sql.toString())) {
 			for (int i = 0; i < parametros.size(); i++) {
-				ps.setObject(i + 1, parametros.get(i));
+				sentencia.setObject(i + 1, parametros.get(i));
 			}
-			logger.debug("Query a ejecutar: {}", ps);
-			try (ResultSet rs = ps.executeQuery()) {
-				while (rs.next()) {
-					lista.add(mapearPrestamo(rs));
+			logger.debug("Query a ejecutar: {}", sentencia);
+			try (ResultSet resultado = sentencia.executeQuery()) {
+				while (resultado.next()) {
+					lista.add(mapearPrestamo(resultado));
+				}
+			}
+		}
+		return lista;
+	}
+	public ArrayList<VideojuegoMasPrestadoDTO> listarVideojuegosMasPrestados() throws SQLException {
+		String sql = "SELECT v.titulo, COUNT(p.id) AS total_prestamos "
+				+ "FROM prestamos p "
+				+ "JOIN copias c ON c.id = p.id_copia "
+				+ "JOIN videojuegos v ON v.id = c.id_videojuego "
+				+ "GROUP BY v.id, v.titulo "
+				+ "ORDER BY total_prestamos DESC, v.titulo ASC "
+				+ "LIMIT 5";
+
+		ArrayList<VideojuegoMasPrestadoDTO> lista = new ArrayList<>();
+		try (Connection connection = dataSource.getConnection();
+		     PreparedStatement sentencia = connection.prepareStatement(sql)) {
+			logger.debug("Query a ejecutar: {}", sentencia);
+			try (ResultSet resultado = sentencia.executeQuery()) {
+				while (resultado.next()) {
+					lista.add(new VideojuegoMasPrestadoDTO(
+							resultado.getString("titulo"),
+							resultado.getInt("total_prestamos")
+					));
 				}
 			}
 		}
@@ -127,6 +156,19 @@ public class PrestamosRepository {
 		}
 		throw new SQLException("La base de datos no ha devuelto el id del préstamo insertado");
 	}
+	public void renovarPrestamo(int idPrestamo, LocalDate nuevaFechaLimite) throws SQLException {
+		String sql = "UPDATE prestamos SET fecha_limite = ?, renovaciones = 1 "
+				+ "WHERE id = ? AND fecha_devolucion IS NULL AND renovaciones = 0";
+		try (Connection connection = dataSource.getConnection();
+		     PreparedStatement sentencia = connection.prepareStatement(sql)) {
+			sentencia.setDate(1, Date.valueOf(nuevaFechaLimite));
+			sentencia.setInt(2, idPrestamo);
+			logger.debug("Query a ejecutar: {}", sentencia);
+			if (sentencia.executeUpdate() != 1) {
+				throw new SQLException("El préstamo " + idPrestamo + " no se ha podido renovar (¿ya devuelto o renovado?)");
+			}
+		}
+	}
 
 
 	public void devolverPrestamo(int idPrestamo, int idCopia, LocalDate fechaDevolucion, BigDecimal multa,
@@ -164,19 +206,20 @@ public class PrestamosRepository {
 		}
 	}
 
-	private PrestamosDTO mapearPrestamo(ResultSet rs) throws SQLException {
-		Date fechaDevolucion = rs.getDate("fecha_devolucion"); // puede ser null
+	private PrestamosDTO mapearPrestamo(ResultSet resultado) throws SQLException {
+		Date fechaDevolucion = resultado.getDate("fecha_devolucion"); // puede ser null
 		return new PrestamosDTO(
-				rs.getInt("id"),
-				rs.getInt("id_copia"),
-				rs.getString("socio"),
-				rs.getString("videojuego"),
-				rs.getString("plataforma"),
-				rs.getString("codigoCopia"),
-				rs.getDate("fecha_prestamo").toLocalDate(),
-				rs.getDate("fecha_limite").toLocalDate(),
+				resultado.getInt("id"),
+				resultado.getInt("id_copia"),
+				resultado.getString("socio"),
+				resultado.getString("videojuego"),
+				resultado.getString("plataforma"),
+				resultado.getString("codigoCopia"),
+				resultado.getDate("fecha_prestamo").toLocalDate(),
+				resultado.getDate("fecha_limite").toLocalDate(),
 				fechaDevolucion == null ? null : fechaDevolucion.toLocalDate(),
-				rs.getBigDecimal("multa")
+				resultado.getBigDecimal("multa"),
+				resultado.getInt("renovaciones")
 		);
 	}
 }

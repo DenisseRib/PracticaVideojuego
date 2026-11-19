@@ -27,10 +27,14 @@ public class VideojuegoService {
 	}
 
 	public ArrayList<VideojuegoDTO> buscarVideojuegos(String titulo, Integer idDesarrolladora, Integer anioDesde,
-	                                                  Integer pegiMax, boolean soloDisponibles) throws SQLException {
+	                                                  Integer pegiMax, Boolean soloDisponibles) throws SQLException {
 
 		String tituloLimpio = (titulo == null || titulo.isBlank()) ? null : titulo.trim();
 		return videojuegoDAO.buscarVideojuegos(tituloLimpio, idDesarrolladora, anioDesde, pegiMax, soloDisponibles);
+	}
+
+	public VideojuegoDTO buscarVideojuegoPorId(int id) throws SQLException {
+		return videojuegoDAO.buscarVideojuegoPorId(id);
 	}
 
 	public ArrayList<DesplegableDTO> listarDesarrolladoras() throws SQLException {
@@ -66,6 +70,8 @@ public class VideojuegoService {
 
 		if (videojuego.getIdDesarrolladora() == null) {
 			errores.add("Debes seleccionar una desarrolladora.");
+		} else if (!desarrolladoraDAO.existeDesarrolladora(videojuego.getIdDesarrolladora())) {
+			errores.add("La desarrolladora seleccionada no existe.");
 		}
 
 		if (!errores.isEmpty()) {

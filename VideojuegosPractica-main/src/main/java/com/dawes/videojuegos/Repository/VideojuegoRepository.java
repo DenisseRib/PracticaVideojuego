@@ -25,7 +25,7 @@ public class VideojuegoRepository {
 
 
 	public ArrayList<VideojuegoDTO> buscarVideojuegos(String titulo, Integer idDesarrolladora, Integer anioDesde,
-	                                                  Integer pegiMax, boolean soloDisponibles) throws SQLException {
+	                                                  Integer pegiMax, Boolean soloDisponibles) throws SQLException {
 		StringBuilder sql = new StringBuilder(
 				"SELECT id, titulo, anio_lanzamiento, pegi, id_desarrolladora, desarrolladora, "
 						+ "copias_totales, copias_disponibles "
@@ -48,7 +48,7 @@ public class VideojuegoRepository {
 			sql.append(" AND pegi <= ?");
 			parametros.add(pegiMax);
 		}
-		if (soloDisponibles) {
+		if (Boolean.TRUE.equals(soloDisponibles)) {
 			sql.append(" AND copias_disponibles > 0");
 		}
 		sql.append(" ORDER BY titulo");
@@ -69,6 +69,26 @@ public class VideojuegoRepository {
 			}
 		}
 		return listaVideojuegos;
+	}
+
+	public VideojuegoDTO buscarVideojuegoPorId(int id) throws SQLException {
+		String sql = "SELECT id, titulo, anio_lanzamiento, pegi, id_desarrolladora, desarrolladora, "
+				+ "copias_totales, copias_disponibles "
+				+ "FROM v_videojuegos_detalle WHERE id = ?";
+
+		try (Connection connection = dataSource.getConnection();
+		     PreparedStatement ps = connection.prepareStatement(sql)) {
+
+			ps.setInt(1, id);
+			logger.debug("Query a ejecutar: {}", ps);
+
+			try (ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					return mapearVideojuego(rs);
+				}
+			}
+		}
+		return null;
 	}
 
 	public int insertarVideojuego(VideojuegoDTO videojuego) throws SQLException {
