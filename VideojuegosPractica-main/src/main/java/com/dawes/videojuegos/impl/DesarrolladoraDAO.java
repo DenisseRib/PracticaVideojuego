@@ -1,5 +1,6 @@
 package com.dawes.videojuegos.impl;
 
+import com.dawes.videojuegos.DTO.DesarrolladoraDTO;
 import com.dawes.videojuegos.DTO.DesplegableDTO;
 import com.dawes.videojuegos.Repository.DesarrolladoraRepository;
 import com.dawes.videojuegos.interfaz.IDesarrolladoraDAO;
@@ -19,6 +20,11 @@ public class DesarrolladoraDAO implements IDesarrolladoraDAO {
 	@Override
 	public ArrayList<DesplegableDTO> listarDesplegable() throws SQLException {
 		return desarrolladoraRepository.listarDesplegable();
+	}
+
+	@Override
+	public ArrayList<DesarrolladoraDTO> listarDesarrolladoras() throws SQLException {
+		return desarrolladoraRepository.listarDesarrolladoras();
 	}
 
 	@Override

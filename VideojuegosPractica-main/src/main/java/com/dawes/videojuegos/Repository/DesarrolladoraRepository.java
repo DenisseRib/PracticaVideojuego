@@ -1,5 +1,6 @@
 package com.dawes.videojuegos.Repository;
 
+import com.dawes.videojuegos.DTO.DesarrolladoraDTO;
 import com.dawes.videojuegos.DTO.DesplegableDTO;
 import org.springframework.stereotype.Repository;
 
@@ -32,6 +33,22 @@ public class DesarrolladoraRepository {
 		}
 		return listaDesarrolladoras;
 	}
+
+	public ArrayList<DesarrolladoraDTO> listarDesarrolladoras() throws SQLException {
+		String sql = "SELECT id, nombre, pais FROM desarrolladoras ORDER BY nombre";
+		ArrayList<DesarrolladoraDTO> listaDesarrolladoras = new ArrayList<>();
+
+		try (Connection connection = dataSource.getConnection();
+		     PreparedStatement ps = connection.prepareStatement(sql);
+		     ResultSet rs = ps.executeQuery()) {
+
+			while (rs.next()) {
+				listaDesarrolladoras.add(new DesarrolladoraDTO(rs.getInt("id"), rs.getString("nombre"), rs.getString("pais")));
+			}
+		}
+		return listaDesarrolladoras;
+	}
+
 	public boolean existeDesarrolladora(int id) throws SQLException {
 		String sql = "SELECT 1 FROM desarrolladoras WHERE id = ?";
 

@@ -188,16 +188,17 @@ public class PrestamosService {
 		return prestamoRenovado;
 	}
 
-	public PrestamosDTO devolverPrestamo(Integer idPrestamo, boolean copiaDanada) throws SQLException, ValidacionException {
+	public PrestamosDTO devolverPrestamo(Integer idPrestamo, boolean copiaDanada) throws SQLException, ValidacionException,
+	                                                                 PrestamoNoEncontradoException, PrestamoYaDevueltoException {
 		if (idPrestamo == null) {
 			throw new ValidacionException("Debes indicar el préstamo a devolver.");
 		}
 		PrestamosDTO prestamo = prestamosDAO.buscarPrestamo(idPrestamo);
 		if (prestamo == null) {
-			throw new ValidacionException("El préstamo seleccionado no existe.");
+			throw new PrestamoNoEncontradoException("El préstamo seleccionado no existe.");
 		}
 		if (prestamo.getFechaDevolucion() != null) {
-			throw new ValidacionException("El préstamo " + idPrestamo + " ya fue devuelto el " + prestamo.getFechaDevolucion() + ".");
+			throw new PrestamoYaDevueltoException("El préstamo " + idPrestamo + " ya fue devuelto el " + prestamo.getFechaDevolucion() + ".");
 		}
 
 		LocalDate hoy = LocalDate.now();
