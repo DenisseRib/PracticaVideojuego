@@ -76,6 +76,15 @@ public class PrestamosService {
 		return listaPrestamos;
 	}
 
+	public PrestamosDTO buscarPrestamoPorId(int idPrestamo) throws SQLException {
+		PrestamosDTO prestamo = prestamosDAO.buscarPrestamo(idPrestamo);
+		if (prestamo == null) {
+			return null;
+		}
+		calcularEstado(prestamo, LocalDate.now());
+		return prestamo;
+	}
+
 	public ArrayList<VideojuegoMasPrestadoDTO> listarVideojuegosMasPrestados() throws SQLException {
 		return prestamosDAO.listarVideojuegosMasPrestados();
 	}

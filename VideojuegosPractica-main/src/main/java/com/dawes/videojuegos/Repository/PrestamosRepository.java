@@ -21,7 +21,7 @@ import java.util.ArrayList;
 public class PrestamosRepository {
 	private static final Logger logger = LoggerFactory.getLogger(PrestamosRepository.class );
 	private static final String SQL_SELECT_PRESTAMOS =
-			"SELECT p.id, p.id_copia, CONCAT(s.nombre, ' ', s.apellidos) AS socio, "
+			"SELECT p.id, p.id_socio, p.id_copia, CONCAT(s.nombre, ' ', s.apellidos) AS socio, "
 					+ "v.titulo AS videojuego, pl.nombre AS plataforma, c.codigo_inventario AS codigoCopia, "
 					+ "p.fecha_prestamo, p.fecha_limite, p.fecha_devolucion, p.multa, p.renovaciones "
 					+ "FROM prestamos p "
@@ -208,7 +208,7 @@ public class PrestamosRepository {
 
 	private PrestamosDTO mapearPrestamo(ResultSet resultado) throws SQLException {
 		Date fechaDevolucion = resultado.getDate("fecha_devolucion"); // puede ser null
-		return new PrestamosDTO(
+		PrestamosDTO prestamo = new PrestamosDTO(
 				resultado.getInt("id"),
 				resultado.getInt("id_copia"),
 				resultado.getString("socio"),
@@ -221,5 +221,7 @@ public class PrestamosRepository {
 				resultado.getBigDecimal("multa"),
 				resultado.getInt("renovaciones")
 		);
+		prestamo.setIdSocio(resultado.getInt("id_socio"));
+		return prestamo;
 	}
 }

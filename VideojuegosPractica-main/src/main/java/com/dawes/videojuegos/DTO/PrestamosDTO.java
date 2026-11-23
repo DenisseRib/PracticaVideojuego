@@ -5,6 +5,7 @@ import java.time.LocalDate;
 
 public class PrestamosDTO {
 	private Integer id;
+	private Integer idSocio;
 	private Integer idCopia;
 	private String socio;
 	private String videojuego;
@@ -16,14 +17,14 @@ public class PrestamosDTO {
 	private BigDecimal multa;
 	private String estado;
 	private int diasRetraso;
-	private int renovaciones;
+	private Integer renovaciones;
 
 	public PrestamosDTO() {
 	}
 
 	public PrestamosDTO(Integer id, Integer idCopia, String socio, String videojuego, String plataforma,
 	                    String codigoCopia, LocalDate fechaPrestamo, LocalDate fechaLimite,
-	                    LocalDate fechaDevolucion, BigDecimal multa, int renovaciones) {
+	                    LocalDate fechaDevolucion, BigDecimal multa, Integer renovaciones) {
 		this.id = id;
 		this.idCopia = idCopia;
 		this.socio = socio;
@@ -42,6 +43,8 @@ public class PrestamosDTO {
 
 
 	public Integer getId() { return id; }
+	public Integer getIdSocio() { return idSocio; }
+	public void setIdSocio(Integer idSocio) { this.idSocio = idSocio; }
 	public Integer getIdCopia() { return idCopia; }
 	public String getSocio() { return socio; }
 	public String getVideojuego() { return videojuego; }
@@ -51,7 +54,7 @@ public class PrestamosDTO {
 	public LocalDate getFechaLimite() { return fechaLimite; }
 	public LocalDate getFechaDevolucion() { return fechaDevolucion; }
 	public BigDecimal getMulta() { return multa; }
-	public int getRenovaciones() { return renovaciones; }
+	public Integer getRenovaciones() { return renovaciones; }
 	public String getEstado() { return estado; }
 	public void setEstado(String estado) { this.estado = estado; }
 	public int getDiasRetraso() { return diasRetraso; }
