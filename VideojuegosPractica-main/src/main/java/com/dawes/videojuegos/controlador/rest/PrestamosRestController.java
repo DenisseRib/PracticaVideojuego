@@ -1,11 +1,7 @@
 package com.dawes.videojuegos.controlador.rest;
 
 import com.dawes.videojuegos.DTO.PrestamosDTO;
-import com.dawes.videojuegos.DTO.VideojuegoDTO;
-import com.dawes.videojuegos.service.PrestamoNoEncontradoException;
-import com.dawes.videojuegos.service.PrestamoYaDevueltoException;
 import com.dawes.videojuegos.service.PrestamosService;
-import com.dawes.videojuegos.service.ValidacionException;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,49 +21,39 @@ import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api")
-@Tag(name = "Préstamos", description = "Gestión de préstamos de videojuegos: consultas, altas, renovaciones y devoluciones")
+@Tag(name = "Préstamos", description = "Gestión de préstamos de videojuegos: consultas, altas y devoluciones")
 public class PrestamosRestController {
 	private final PrestamosService prestamosService;
+
 	public PrestamosRestController(PrestamosService prestamosService) {
 		this.prestamosService = prestamosService;
 	}
+
 	@Operation(summary = "Listar préstamos",
 			description = "Devuelve los préstamos filtrados por socio, título de videojuego, estado "
 					+ "(EN_PLAZO, VENCIDO, DEVUELTO) y fecha de préstamo desde. "
 					+ "Los filtros son opcionales y combinables.")
 	@ApiResponses({
-			@ApiResponse(responseCode = "200", description = "Lista de préstamos encontrada",
+			@ApiResponse(responseCode = "200", description = "Lista de préstamos (puede estar vacía)",
 					content = @Content(schema = @Schema(implementation = PrestamosDTO.class))),
 			@ApiResponse(responseCode = "400", description = "Estado de filtro no válido")
 	})
-	@GetMapping ("/prestamos")
+	@GetMapping("/prestamos")
 	public ResponseEntity<ArrayList<PrestamosDTO>> listarPrestamos(
-			@Parameter(description = "Nombre del socio (búsqueda parcial)")
+			@Parameter(description = "Texto contenido en el nombre o apellidos del socio")
 			@RequestParam(required = false) String socio,
-			@Parameter(description = "Título del videojuego (búsqueda parcial)")
-			@RequestParam (required = false) String titulo,
+			@Parameter(description = "Texto contenido en el título del videojuego")
+			@RequestParam(required = false) String titulo,
 			@Parameter(description = "Estado del préstamo: EN_PLAZO, VENCIDO o DEVUELTO", example = "EN_PLAZO")
-			@RequestParam (required = false) String estado,
+			@RequestParam(required = false) String estado,
 			@Parameter(description = "Fecha de préstamo desde (inclusive), formato ISO yyyy-MM-dd", example = "2026-01-01")
-			@RequestParam (required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde) throws SQLException {
-
-
-
-		try {
-			ArrayList<PrestamosDTO> prestamos = prestamosService.listarPrestamos(socio, titulo, null, estado, fechaDesde);
-			prestamos.forEach(prestamo -> {
-				if (!PrestamosService.ESTADO_VENCIDO.equals(prestamo.getEstado())) {
-					prestamo.setDiasRetraso(0);
-				}
-			});
-			return ResponseEntity.ok(prestamos);
-		} catch (ValidacionException e) {
-			return ResponseEntity.badRequest().build();
-		}
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde)
+			throws SQLException {
+		return ResponseEntity.ok(prestamosService.listarPrestamos(socio, titulo, null, estado, fechaDesde));
 	}
 
-	@Operation(summary = "Buscar préstamo por ID",
-			description = "Devuelve un préstamo concreto con su estado calculado "
+	@Operation(summary = "Obtener préstamo por ID",
+			description = "Devuelve un préstamo con su estado calculado "
 					+ "(EN_PLAZO, VENCIDO o DEVUELTO) y los días de retraso.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "Préstamo encontrado",
@@ -75,74 +61,75 @@ public class PrestamosRestController {
 			@ApiResponse(responseCode = "404", description = "No existe un préstamo con ese ID")
 	})
 	@GetMapping("/prestamos/{id}")
-	public ResponseEntity<PrestamosDTO> buscarPrestamoPorId(
-			@Parameter(description = "ID del préstamo", example = "1")
+	public ResponseEntity<PrestamosDTO> obtenerPrestamo(
+			@Parameter(description = "ID del préstamo", example = "17")
 			@PathVariable int id) throws SQLException {
-		PrestamosDTO prestamo = prestamosService.buscarPrestamoPorId(id);
-		if (prestamo == null) {
-			return ResponseEntity.notFound().build();
-		}
-		if (!PrestamosService.ESTADO_VENCIDO.equals(prestamo.getEstado())) {
-			prestamo.setDiasRetraso(0);
-		}
-		return ResponseEntity.ok(prestamo);
+		return ResponseEntity.ok(prestamosService.buscarPrestamoPorId(id));
 	}
+
 	@Operation(summary = "Registrar un préstamo",
-			description = "Crea un nuevo préstamo para un socio y una copia. "
-					+ "Aplica las reglas de negocio: socio activo, copia disponible, máximo 2 préstamos abiertos, "
-					+ "edad mínima según PEGI, sin préstamos vencidos y restricciones para menores con copias deterioradas. "
-					+ "La fecha límite es de 5 días para novedades (lanzamiento en los últimos 2 años) o 10 días en otro caso.")
+			description = "Crea un préstamo para un socio y una copia. Comprueba primero que el socio y la copia "
+					+ "existen (404) y después aplica las reglas RN-1 a RN-5 en orden (422). "
+					+ "La fecha límite es de 7 días para novedades (año actual o anterior) o 15 días en otro caso.")
 	@ApiResponses({
-			@ApiResponse(responseCode = "201", description = "Préstamo registrado correctamente",
+			@ApiResponse(responseCode = "201", description = "Préstamo registrado",
 					content = @Content(schema = @Schema(implementation = PrestamosDTO.class))),
-			@ApiResponse(responseCode = "400", description = "Datos no válidos o reglas de negocio incumplidas")
+			@ApiResponse(responseCode = "400", description = "Faltan idSocio o idCopia"),
+			@ApiResponse(responseCode = "404", description = "El socio o la copia no existen"),
+			@ApiResponse(responseCode = "422", description = "No se cumple una regla de negocio RN-1 a RN-5")
 	})
 	@PostMapping("/prestamos")
-	public ResponseEntity<PrestamosDTO> insertarPrestamo(
+	public ResponseEntity<PrestamosDTO> registrarPrestamo(
 			@io.swagger.v3.oas.annotations.parameters.RequestBody(
 					description = "Datos del préstamo: idSocio e idCopia son obligatorios",
 					required = true,
 					content = @Content(schema = @Schema(implementation = PrestamosDTO.class)))
-			@RequestBody PrestamosDTO prestamo) throws SQLException {
-		try {
-			PrestamosDTO prestamoRegistrado = prestamosService.registrarPrestamo(prestamo.getIdSocio(), prestamo.getIdCopia());
-			return new ResponseEntity<>(prestamoRegistrado, HttpStatus.CREATED);
-		} catch (ValidacionException e) {
-			return ResponseEntity.badRequest().build();
-		}
+			@RequestBody(required = false) PrestamosDTO prestamo) throws SQLException {
+		Integer idSocio = prestamo == null ? null : prestamo.getIdSocio();
+		Integer idCopia = prestamo == null ? null : prestamo.getIdCopia();
+		PrestamosDTO prestamoCreado = prestamosService.registrarPrestamo(idSocio, idCopia);
+		return ResponseEntity.status(HttpStatus.CREATED).body(prestamoCreado);
 	}
 
 	@Operation(summary = "Devolver un préstamo",
-			description = "Registra la devolución de un préstamo. Calcula la multa por días de retraso "
-					+ "(0,50 €/día, máximo 10 €) y, si la copia se devuelve dañada, la marca como dañada "
-					+ "e inactiva y añade un recargo de 5 €.")
+			description = "Registra la devolución de un préstamo. Calcula la multa de 0,50 € por cada día de "
+					+ "retraso y, si la copia se devuelve dañada, la marca como DAÑADO e inactiva en la misma transacción.")
 	@ApiResponses({
-			@ApiResponse(responseCode = "200", description = "Préstamo devuelto correctamente",
+			@ApiResponse(responseCode = "200", description = "Préstamo devuelto",
 					content = @Content(schema = @Schema(implementation = PrestamosDTO.class))),
-			@ApiResponse(responseCode = "400", description = "Datos de devolución no válidos"),
 			@ApiResponse(responseCode = "404", description = "No existe un préstamo con ese ID"),
-			@ApiResponse(responseCode = "409", description = "El préstamo ya había sido devuelto")
+			@ApiResponse(responseCode = "409", description = "El préstamo ya estaba devuelto")
 	})
 	@PutMapping("/prestamos/{id}/devolucion")
 	public ResponseEntity<PrestamosDTO> devolverPrestamo(
-			@Parameter(description = "ID del préstamo a devolver", example = "1")
+			@Parameter(description = "ID del préstamo a devolver", example = "17")
 			@PathVariable int id,
-			@Parameter(description = "Cuerpo opcional de la devolución; admite el campo 'copiaDanada' (boolean)")
+			@Parameter(description = "Cuerpo opcional; admite copiaDañada o copiaDanada (boolean)")
 			@RequestBody(required = false) JsonNode devolucion,
-			@Parameter(description = "Indica si la copia se devuelve dañada (alternativa al campo copiaDanada del cuerpo)")
-			@RequestParam(required = false) Boolean copiaDanada) throws SQLException {
-		try {
-			boolean danada = copiaDanada != null ? copiaDanada
-					: devolucion != null && devolucion.path("copiaDanada").asBoolean(false);
-			PrestamosDTO prestamoDevuelto = prestamosService.devolverPrestamo(id, danada);
-			return ResponseEntity.ok(prestamoDevuelto);
-		} catch (PrestamoNoEncontradoException e) {
-			return ResponseEntity.notFound().build();
-		} catch (PrestamoYaDevueltoException e) {
-			return ResponseEntity.status(HttpStatus.CONFLICT).build();
-		} catch (ValidacionException e) {
-			return ResponseEntity.badRequest().build();
-		}
+			@Parameter(description = "Indica si la copia se devuelve dañada")
+			@RequestParam(required = false) Boolean copiaDanada,
+			@Parameter(description = "Alternativa con ñ para indicar copia dañada")
+			@RequestParam(required = false, name = "copiaDañada") Boolean copiaDanadaConEnie)
+			throws SQLException {
+		boolean danada = resolverCopiaDanada(devolucion, copiaDanada, copiaDanadaConEnie);
+		return ResponseEntity.ok(prestamosService.devolverPrestamo(id, danada));
 	}
 
+	private boolean resolverCopiaDanada(JsonNode devolucion, Boolean copiaDanada, Boolean copiaDanadaConEnie) {
+		if (copiaDanada != null) {
+			return copiaDanada;
+		}
+		if (copiaDanadaConEnie != null) {
+			return copiaDanadaConEnie;
+		}
+		if (devolucion == null || devolucion.isNull()) {
+			return false;
+		}
+		JsonNode nodo = devolucion.path("copiaDañada");
+		if (nodo.isMissingNode() || nodo.isNull()) {
+			nodo = devolucion.path("copiaDanada");
+		}
+		return nodo.asBoolean(false);
+	}
 }
+

@@ -14,6 +14,10 @@ public interface ISociosDAO {
 	ArrayList<DesplegableDTO> listarActivosDesplegable() throws SQLException;
 	public SociosDTO  buscarSocioPorId( int id) throws SQLException;
 	boolean existeEmail(String email) throws SQLException;
+	boolean existeEmailDeOtroSocio(String email, int idSocio) throws SQLException;
 
 	int insertarSocio(SociosDTO socio) throws SQLException;
+	int actualizarSocio(SociosDTO socio) throws SQLException;
+	int eliminarSocio(int id) throws SQLException;
+	int contarPrestamosSocio(int id) throws SQLException;
 }

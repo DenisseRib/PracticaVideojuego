@@ -15,12 +15,12 @@ public class PrestamosDTO {
 	private Integer idCopia;
 	@Schema(description = "Nombre completo del socio", example = "Ana García")
 	private String socio;
-	@Schema(description = "Título del videojuego", example = "The Legend of Zelda")
-	private String videojuego;
+	@Schema(description = "Título del videojuego", example = "Elden Ring")
+	private String titulo;
 	@Schema(description = "Plataforma de la copia", example = "Nintendo Switch")
 	private String plataforma;
-	@Schema(description = "Código de inventario de la copia", example = "SW-0001")
-	private String codigoCopia;
+	@Schema(description = "Código de inventario de la copia", example = "CP-0016")
+	private String codigoInventario;
 	@Schema(description = "Fecha del préstamo (yyyy-MM-dd)", example = "2026-11-20")
 	private LocalDate fechaPrestamo;
 	@Schema(description = "Fecha límite de devolución (yyyy-MM-dd)", example = "2026-11-30")
@@ -39,15 +39,15 @@ public class PrestamosDTO {
 	public PrestamosDTO() {
 	}
 
-	public PrestamosDTO(Integer id, Integer idCopia, String socio, String videojuego, String plataforma,
-	                    String codigoCopia, LocalDate fechaPrestamo, LocalDate fechaLimite,
+	public PrestamosDTO(Integer id, Integer idCopia, String socio, String titulo, String plataforma,
+	                    String codigoInventario, LocalDate fechaPrestamo, LocalDate fechaLimite,
 	                    LocalDate fechaDevolucion, BigDecimal multa, Integer renovaciones) {
 		this.id = id;
 		this.idCopia = idCopia;
 		this.socio = socio;
-		this.videojuego = videojuego;
+		this.titulo = titulo;
 		this.plataforma = plataforma;
-		this.codigoCopia = codigoCopia;
+		this.codigoInventario = codigoInventario;
 		this.fechaPrestamo = fechaPrestamo;
 		this.fechaLimite = fechaLimite;
 		this.fechaDevolucion = fechaDevolucion;
@@ -64,9 +64,9 @@ public class PrestamosDTO {
 	public void setIdSocio(Integer idSocio) { this.idSocio = idSocio; }
 	public Integer getIdCopia() { return idCopia; }
 	public String getSocio() { return socio; }
-	public String getVideojuego() { return videojuego; }
+	public String getTitulo() { return titulo; }
 	public String getPlataforma() { return plataforma; }
-	public String getCodigoCopia() { return codigoCopia; }
+	public String getCodigoInventario() { return codigoInventario; }
 	public LocalDate getFechaPrestamo() { return fechaPrestamo; }
 	public LocalDate getFechaLimite() { return fechaLimite; }
 	public LocalDate getFechaDevolucion() { return fechaDevolucion; }

@@ -4,6 +4,7 @@ import com.dawes.videojuegos.DTO.DesplegableDTO;
 import com.dawes.videojuegos.DTO.VideojuegoDTO;
 import com.dawes.videojuegos.interfaz.IDesarrolladoraDAO;
 import com.dawes.videojuegos.interfaz.IVideojuegoDAO;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
@@ -34,7 +35,11 @@ public class VideojuegoService {
 	}
 
 	public VideojuegoDTO buscarVideojuegoPorId(int id) throws SQLException {
-		return videojuegoDAO.buscarVideojuegoPorId(id);
+		VideojuegoDTO videojuego = videojuegoDAO.buscarVideojuegoPorId(id);
+		if (videojuego == null) {
+			throw new ValidacionException(HttpStatus.NOT_FOUND, "No existe un videojuego con id " + id + ".");
+		}
+		return videojuego;
 	}
 
 	public ArrayList<DesplegableDTO> listarDesarrolladoras() throws SQLException {
@@ -46,7 +51,10 @@ public class VideojuegoService {
 	}
 
 
-	public int insertarVideojuego(VideojuegoDTO videojuego) throws SQLException, ValidacionException {
+	public VideojuegoDTO insertarVideojuego(VideojuegoDTO videojuego) throws SQLException {
+		if (videojuego == null) {
+			throw new ValidacionException("Los datos del videojuego son obligatorios.");
+		}
 		ArrayList<String> errores = new ArrayList<>();
 		int anioActual = LocalDate.now().getYear();
 
@@ -70,15 +78,17 @@ public class VideojuegoService {
 
 		if (videojuego.getIdDesarrolladora() == null) {
 			errores.add("Debes seleccionar una desarrolladora.");
-		} else if (!desarrolladoraDAO.existeDesarrolladora(videojuego.getIdDesarrolladora())) {
-			errores.add("La desarrolladora seleccionada no existe.");
 		}
 
 		if (!errores.isEmpty()) {
 			throw new ValidacionException(String.join(" ", errores));
 		}
+		if (!desarrolladoraDAO.existeDesarrolladora(videojuego.getIdDesarrolladora())) {
+			throw new ValidacionException(HttpStatus.NOT_FOUND, "La desarrolladora seleccionada no existe.");
+		}
 
 		videojuego.setTitulo(titulo);
-		return videojuegoDAO.insertarVideojuego(videojuego);
+		int idNuevo = videojuegoDAO.insertarVideojuego(videojuego);
+		return buscarVideojuegoPorId(idNuevo);
 	}
 }

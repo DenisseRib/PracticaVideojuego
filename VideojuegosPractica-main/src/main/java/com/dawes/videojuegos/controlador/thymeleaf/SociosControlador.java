@@ -63,10 +63,10 @@ public class SociosControlador {
 	                       Model model, RedirectAttributes redirectAttributes) {
 		try {
 			SociosDTO socio = new SociosDTO(nombre, apellidos, email, fechaNacimiento);
-			int idNuevo = sociosService.insertarSocio(socio);
+			SociosDTO socioCreado = sociosService.insertarSocio(socio);
 
 			redirectAttributes.addFlashAttribute("mensajeOk",
-					"Socio '" + socio.getNombre() + " " + socio.getApellidos() + "' insertado correctamente (id " + idNuevo + ")");
+					"Socio '" + socioCreado.getNombre() + " " + socioCreado.getApellidos() + "' insertado correctamente (id " + socioCreado.getId() + ")");
 			return "redirect:/socios/insertar";
 
 		} catch (SQLException e) {

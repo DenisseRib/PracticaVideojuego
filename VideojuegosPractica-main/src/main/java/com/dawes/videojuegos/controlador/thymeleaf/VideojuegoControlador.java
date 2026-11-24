@@ -72,10 +72,10 @@ public class VideojuegoControlador {
 	                       Model model, RedirectAttributes redirectAttributes) {
 		try {
 			VideojuegoDTO videojuego = new VideojuegoDTO(titulo, anioLanzamiento, pegi, idDesarrolladora);
-			int idNuevo = videojuegoService.insertarVideojuego(videojuego);
+			VideojuegoDTO videojuegoCreado = videojuegoService.insertarVideojuego(videojuego);
 
 			redirectAttributes.addFlashAttribute("mensajeOk",
-					"Videojuego '" + videojuego.getTitulo() + "' insertado correctamente (id " + idNuevo + ")");
+					"Videojuego '" + videojuegoCreado.getTitulo() + "' insertado correctamente (id " + videojuegoCreado.getId() + ")");
 			return "redirect:/videojuegos/insertar";
 
 		} catch (ValidacionException e) {

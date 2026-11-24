@@ -1,8 +1,8 @@
 package com.dawes.videojuegos.service;
 
 import com.dawes.videojuegos.DTO.SociosDTO;
-import com.dawes.videojuegos.DTO.VideojuegoDTO;
 import com.dawes.videojuegos.interfaz.ISociosDAO;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
@@ -28,9 +28,45 @@ public class SociosService {
 	}
 
 	public SociosDTO buscarSocioPorId(int id) throws SQLException {
-		return sociosDAO.buscarSocioPorId(id);
+		SociosDTO socio = sociosDAO.buscarSocioPorId(id);
+		if (socio == null) {
+			throw new ValidacionException(HttpStatus.NOT_FOUND, "No existe un socio con id " + id + ".");
+		}
+		return socio;
 	}
-	public int insertarSocio(SociosDTO socio) throws SQLException, ValidacionException {
+
+	public SociosDTO insertarSocio(SociosDTO socio) throws SQLException {
+		if (socio == null) {
+			throw new ValidacionException("Los datos del socio son obligatorios.");
+		}
+		validarDatosSocio(socio, null);
+		socio.setFechaAlta(LocalDate.now());
+		socio.setActivo(true);
+		int idNuevo = sociosDAO.insertarSocio(socio);
+		return buscarSocioPorId(idNuevo);
+	}
+
+	public SociosDTO actualizarSocio(int id, SociosDTO socio) throws SQLException {
+		if (socio == null) {
+			throw new ValidacionException("Los datos del socio son obligatorios.");
+		}
+		buscarSocioPorId(id);
+		validarDatosSocio(socio, id);
+		socio.setId(id);
+		sociosDAO.actualizarSocio(socio);
+		return buscarSocioPorId(id);
+	}
+
+	public void eliminarSocio(int id) throws SQLException {
+		buscarSocioPorId(id);
+		if (sociosDAO.contarPrestamosSocio(id) > 0) {
+			throw new ValidacionException(HttpStatus.CONFLICT,
+					"No se puede borrar el socio porque tiene préstamos registrados.");
+		}
+		sociosDAO.eliminarSocio(id);
+	}
+
+	private void validarDatosSocio(SociosDTO socio, Integer idExcluir) throws SQLException {
 		ArrayList<String> errores = new ArrayList<>();
 
 		String nombre = socio.getNombre() == null ? "" : socio.getNombre().trim();
@@ -52,8 +88,6 @@ public class SociosService {
 			errores.add("El email es obligatorio.");
 		} else if (email.length() > LONGITUD_MAXIMA_EMAIL || !PATRON_EMAIL.matcher(email).matches()) {
 			errores.add("El email no tiene un formato válido.");
-		} else if (sociosDAO.existeEmail(email)) {
-			errores.add("Ya existe un socio con el email " + email);
 		}
 
 		LocalDate fechaNacimiento = socio.getFechaNacimiento();
@@ -67,13 +101,18 @@ public class SociosService {
 			throw new ValidacionException(String.join(" ", errores));
 		}
 
+		boolean emailRepetido = idExcluir == null
+				? sociosDAO.existeEmail(email)
+				: sociosDAO.existeEmailDeOtroSocio(email, idExcluir);
+		if (emailRepetido) {
+			throw new ValidacionException(HttpStatus.CONFLICT, "Ya existe un socio con el email " + email + ".");
+		}
+
 		socio.setNombre(nombre);
 		socio.setApellidos(apellidos);
 		socio.setEmail(email);
-		socio.setFechaAlta(LocalDate.now());
-		socio.setActivo(true);
-		return sociosDAO.insertarSocio(socio);
 	}
+
 	public String limpiar(String texto) {
 		return (texto == null || texto.isBlank()) ? null : texto.trim();
 	}

@@ -36,8 +36,8 @@
 
 <div class="ok" th:if="${prestamoRegistrado}">
     <h2>Préstamo registrado</h2>
-    <p><strong th:text="${prestamoRegistrado.videojuego}"></strong>
-        (<span th:text="${prestamoRegistrado.plataforma}"></span>, copia <span th:text="${prestamoRegistrado.codigoCopia}"></span>)</p>
+    <p><strong th:text="${prestamoRegistrado.titulo}"></strong>
+        (<span th:text="${prestamoRegistrado.plataforma}"></span>, copia <span th:text="${prestamoRegistrado.codigoInventario}"></span>)</p>
     <p>Socio: <span th:text="${prestamoRegistrado.socio}"></span></p>
     <p>Préstamo: <span th:text="${prestamoRegistrado.fechaPrestamo}"></span>
         · Fecha límite: <strong th:text="${prestamoRegistrado.fechaLimite}"></strong></p>

@@ -1,10 +1,14 @@
 package com.dawes.videojuegos.DTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDate;
 
+@Schema(description = "Socio de la biblioteca de videojuegos")
 public class SociosDTO {
 
-    private Integer idSocio;
+    @Schema(description = "ID del socio", example = "2")
+    private Integer id;
     private String nombre;
     private String apellidos;
     private String email;
@@ -25,9 +29,9 @@ public class SociosDTO {
         this.fechaNacimiento = fechaNacimiento;
     }
 
-    public SociosDTO(Integer idSocio, String nombre, String apellidos, String email, LocalDate fechaNacimiento,
+    public SociosDTO(Integer id, String nombre, String apellidos, String email, LocalDate fechaNacimiento,
                      LocalDate fechaAlta, boolean activo, Integer edad, Integer prestamosAbiertos) {
-        this.idSocio = idSocio;
+        this.id = id;
         this.nombre = nombre;
         this.apellidos = apellidos;
         this.email = email;
@@ -38,8 +42,8 @@ public class SociosDTO {
         this.prestamosAbiertos = prestamosAbiertos;
     }
 
-    public Integer getIdSocio() { return idSocio; }
-    public void setIdSocio(Integer idSocio) { this.idSocio = idSocio; }
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }

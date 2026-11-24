@@ -21,8 +21,8 @@
 
 <div class="ok" th:if="${prestamoDevuelto}">
     <h2>Préstamo devuelto</h2>
-    <p><strong th:text="${prestamoDevuelto.videojuego}"></strong>
-        (<span th:text="${prestamoDevuelto.plataforma}"></span>, copia <span th:text="${prestamoDevuelto.codigoCopia}"></span>)</p>
+    <p><strong th:text="${prestamoDevuelto.titulo}"></strong>
+        (<span th:text="${prestamoDevuelto.plataforma}"></span>, copia <span th:text="${prestamoDevuelto.codigoInventario}"></span>)</p>
     <p>Socio: <span th:text="${prestamoDevuelto.socio}"></span></p>
     <p>Préstamo: <span th:text="${prestamoDevuelto.fechaPrestamo}"></span>
         · Fecha límite: <span th:text="${prestamoDevuelto.fechaLimite}"></span></p>
@@ -34,8 +34,8 @@
 
 <div class="ok" th:if="${prestamoRenovado}">
     <h2>Préstamo renovado</h2>
-    <p><strong th:text="${prestamoRenovado.videojuego}"></strong>
-        (<span th:text="${prestamoRenovado.plataforma}"></span>, copia <span th:text="${prestamoRenovado.codigoCopia}"></span>)</p>
+    <p><strong th:text="${prestamoRenovado.titulo}"></strong>
+        (<span th:text="${prestamoRenovado.plataforma}"></span>, copia <span th:text="${prestamoRenovado.codigoInventario}"></span>)</p>
     <p>Socio: <span th:text="${prestamoRenovado.socio}"></span></p>
     <p>Nueva fecha límite: <strong th:text="${prestamoRenovado.fechaLimite}"></strong></p>
 </div>
@@ -57,7 +57,7 @@
     <tr th:each="prestamo : ${listaPrestamos}">
         <td th:text="${prestamo.id}"></td>
         <td th:text="${prestamo.socio}"></td>
-        <td th:text="${prestamo.videojuego} + ' (' + ${prestamo.plataforma} + ')'"></td>
+        <td th:text="${prestamo.titulo} + ' (' + ${prestamo.plataforma} + ')'"></td>
         <td th:text="${prestamo.fechaLimite}"></td>
         <td th:text="${prestamo.renovaciones}"></td>
         <td><span class="estado" th:classappend="'estado-' + ${prestamo.estado}" th:text="${prestamo.estado}"></span>

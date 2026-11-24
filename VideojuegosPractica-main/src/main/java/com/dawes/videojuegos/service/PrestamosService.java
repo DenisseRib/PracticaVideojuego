@@ -10,6 +10,7 @@ import com.dawes.videojuegos.interfaz.IPrestamosDAO;
 import com.dawes.videojuegos.interfaz.ISociosDAO;
 import com.dawes.videojuegos.interfaz.IPlataformaDAO;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -30,14 +31,10 @@ public class PrestamosService {
 	private static final int MAXIMO_RENOVACIONES = 1;
 	private static final int DIAS_RENOVACION = 7;
 	private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-	private static final int EDAD_MINIMA_COPIA_DETERIORADA = 18;
-	private static final List<String> ESTADOS_DETERIORADOS = List.of("DESGASTADO", "DAÑADO");
-	private static final int MAXIMO_PRESTAMOS_ABIERTOS = 2;
-	private static final int DIAS_PRESTAMO_NOVEDAD = 5;
-	private static final int DIAS_PRESTAMO_NORMAL = 10;
+	private static final int MAXIMO_PRESTAMOS_ABIERTOS = 3;
+	private static final int DIAS_PRESTAMO_NOVEDAD = 7;
+	private static final int DIAS_PRESTAMO_NORMAL = 15;
 	private static final BigDecimal MULTA_POR_DIA = new BigDecimal("0.50");
-	private static final BigDecimal MULTA_MAXIMA = new BigDecimal("10.00");
-	private static final BigDecimal RECARGO_COPIA_DANADA = new BigDecimal("5.00");
 
 	private final IPrestamosDAO prestamosDAO;
 	private final ISociosDAO sociosDAO;
@@ -53,12 +50,12 @@ public class PrestamosService {
 	}
 
 	public ArrayList<PrestamosDTO> listarPrestamos( String socio, String videojuego, Integer idPlataforma, String estado,
-	                                                LocalDate fechaDesde) throws SQLException, ValidacionException {
+	                                                LocalDate fechaDesde) throws SQLException {
 		String estadoLimpio = limpiar(estado);
 		if (estadoLimpio != null) {
 			estadoLimpio = estadoLimpio.toUpperCase();
 			if (!ESTADOS_VALIDOS.contains(estadoLimpio)) {
-				throw new ValidacionException("El estado debe ser: en plazo, vencido o devuelto.");
+				throw new ValidacionException("El estado debe ser EN_PLAZO, VENCIDO o DEVUELTO.");
 			}
 		}
 		LocalDate hoy = LocalDate.now();
@@ -79,7 +76,7 @@ public class PrestamosService {
 	public PrestamosDTO buscarPrestamoPorId(int idPrestamo) throws SQLException {
 		PrestamosDTO prestamo = prestamosDAO.buscarPrestamo(idPrestamo);
 		if (prestamo == null) {
-			return null;
+			throw new ValidacionException(HttpStatus.NOT_FOUND, "No existe un préstamo con id " + idPrestamo + ".");
 		}
 		calcularEstado(prestamo, LocalDate.now());
 		return prestamo;
@@ -101,7 +98,7 @@ public class PrestamosService {
 		return copiasDAO.listarDisponiblesDesplegable();
 	}
 
-	public PrestamosDTO registrarPrestamo(Integer idSocio, Integer idCopia) throws SQLException, ValidacionException {
+	public PrestamosDTO registrarPrestamo(Integer idSocio, Integer idCopia) throws SQLException {
 		if (idSocio == null) {
 			throw new ValidacionException("Debes seleccionar un socio.");
 		}
@@ -111,38 +108,32 @@ public class PrestamosService {
 
 		SociosDTO socio = sociosDAO.buscarSocio(idSocio);
 		if (socio == null) {
-			throw new ValidacionException("El socio seleccionado no existe.");
+			throw new ValidacionException(HttpStatus.NOT_FOUND, "No existe un socio con id " + idSocio + ".");
 		}
 		CopiaDTO copia = copiasDAO.buscarCopia(idCopia);
 		if (copia == null) {
-			throw new ValidacionException("La copia seleccionada no existe.");
+			throw new ValidacionException(HttpStatus.NOT_FOUND, "No existe una copia con id " + idCopia + ".");
 		}
 
 		LocalDate hoy = LocalDate.now();
-		ArrayList<String> reglasIncumplidas = new ArrayList<>();
-
 		if (!socio.isActivo()) {
-			reglasIncumplidas.add("RN-1: El socio no está activo.");
+			throw new ValidacionException(HttpStatus.UNPROCESSABLE_ENTITY, "RN-1: el socio no está activo.");
 		}
 		if (!copia.isActiva() || copia.getPrestamosAbiertos() > 0) {
-			reglasIncumplidas.add("RN-2: La copia " + copia.getCodigoInventario() + " no está disponible (inactiva o ya prestada).");
+			throw new ValidacionException(HttpStatus.UNPROCESSABLE_ENTITY,
+					"RN-2: la copia " + copia.getCodigoInventario() + " no está disponible (inactiva o ya prestada).");
 		}
 		if (socio.getPrestamosAbiertos() >= MAXIMO_PRESTAMOS_ABIERTOS) {
-			reglasIncumplidas.add("RN-3: El socio ya tiene " + MAXIMO_PRESTAMOS_ABIERTOS + " préstamos abiertos.");
+			throw new ValidacionException(HttpStatus.UNPROCESSABLE_ENTITY,
+					"RN-3: el socio ya tiene " + MAXIMO_PRESTAMOS_ABIERTOS + " préstamos abiertos.");
 		}
 		if (socio.getEdad() < copia.getPegi()) {
-			reglasIncumplidas.add("RN-4: El socio tiene " + socio.getEdad() + " años y el juego es PEGI " + copia.getPegi() + ".");
+			throw new ValidacionException(HttpStatus.UNPROCESSABLE_ENTITY,
+					"RN-4: el socio tiene " + socio.getEdad() + " años y el juego requiere PEGI " + copia.getPegi() + ".");
 		}
 		if (prestamosDAO.contarPrestamosVencidosSocio(idSocio, hoy) > 0) {
-			reglasIncumplidas.add("RN-5: El socio tiene préstamos vencidos sin devolver.");
-		}
-
-		if (socio.getEdad() < EDAD_MINIMA_COPIA_DETERIORADA && ESTADOS_DETERIORADOS.contains(copia.getEstado())) {
-			reglasIncumplidas.add("RN-6: Los menores de " + EDAD_MINIMA_COPIA_DETERIORADA + " años no pueden llevarse copias en estado " + copia.getEstado() + ".");
-		}
-
-		if (!reglasIncumplidas.isEmpty()) {
-			throw new ValidacionException(String.join(" ", reglasIncumplidas));
+			throw new ValidacionException(HttpStatus.UNPROCESSABLE_ENTITY,
+					"RN-5: el socio tiene préstamos vencidos sin devolver.");
 		}
 
 		LocalDate fechaLimite = hoy.plusDays(esNovedad(copia.getAnioLanzamiento(), hoy) ? DIAS_PRESTAMO_NOVEDAD : DIAS_PRESTAMO_NORMAL);
@@ -154,17 +145,17 @@ public class PrestamosService {
 	}
 
 	private boolean esNovedad(int anioLanzamiento, LocalDate hoy) {
-		return anioLanzamiento >= hoy.getYear() - 2;
+		return anioLanzamiento == hoy.getYear() || anioLanzamiento == hoy.getYear() - 1;
 	}
 
 
-	public PrestamosDTO renovarPrestamo(Integer idPrestamo) throws SQLException, ValidacionException {
+	public PrestamosDTO renovarPrestamo(Integer idPrestamo) throws SQLException {
 		if (idPrestamo == null) {
 			throw new ValidacionException("Debes indicar el préstamo a renovar.");
 		}
 		PrestamosDTO prestamo = prestamosDAO.buscarPrestamo(idPrestamo);
 		if (prestamo == null) {
-			throw new ValidacionException("El préstamo seleccionado no existe.");
+			throw new ValidacionException(HttpStatus.NOT_FOUND, "No existe un préstamo con id " + idPrestamo + ".");
 		}
 		if (prestamo.getFechaDevolucion() != null) {
 			throw new ValidacionException("No se puede renovar el préstamo " + idPrestamo + ": ya fue devuelto el "
@@ -188,25 +179,21 @@ public class PrestamosService {
 		return prestamoRenovado;
 	}
 
-	public PrestamosDTO devolverPrestamo(Integer idPrestamo, boolean copiaDanada) throws SQLException, ValidacionException,
-	                                                                 PrestamoNoEncontradoException, PrestamoYaDevueltoException {
+	public PrestamosDTO devolverPrestamo(Integer idPrestamo, boolean copiaDanada) throws SQLException {
 		if (idPrestamo == null) {
 			throw new ValidacionException("Debes indicar el préstamo a devolver.");
 		}
 		PrestamosDTO prestamo = prestamosDAO.buscarPrestamo(idPrestamo);
 		if (prestamo == null) {
-			throw new PrestamoNoEncontradoException("El préstamo seleccionado no existe.");
+			throw new ValidacionException(HttpStatus.NOT_FOUND, "No existe un préstamo con id " + idPrestamo + ".");
 		}
 		if (prestamo.getFechaDevolucion() != null) {
-			throw new PrestamoYaDevueltoException("El préstamo " + idPrestamo + " ya fue devuelto el " + prestamo.getFechaDevolucion() + ".");
+			throw new ValidacionException(HttpStatus.CONFLICT,
+					"El préstamo " + idPrestamo + " ya fue devuelto el " + FORMATO_FECHA.format(prestamo.getFechaDevolucion()) + ".");
 		}
 
 		LocalDate hoy = LocalDate.now();
-		BigDecimal multa = MULTA_POR_DIA.multiply(BigDecimal.valueOf(diasDeRetraso(prestamo.getFechaLimite(), hoy)))
-				.min(MULTA_MAXIMA);
-		if (copiaDanada) {
-			multa = multa.add(RECARGO_COPIA_DANADA);
-		}
+		BigDecimal multa = MULTA_POR_DIA.multiply(BigDecimal.valueOf(diasDeRetraso(prestamo.getFechaLimite(), hoy)));
 
 		prestamosDAO.devolverPrestamo(idPrestamo, prestamo.getIdCopia(), hoy, multa, copiaDanada);
 
@@ -223,7 +210,7 @@ public class PrestamosService {
 	private void calcularEstado(PrestamosDTO prestamo, LocalDate hoy) {
 		if (prestamo.getFechaDevolucion() != null) {
 			prestamo.setEstado(ESTADO_DEVUELTO);
-			prestamo.setDiasRetraso((int) diasDeRetraso(prestamo.getFechaLimite(), prestamo.getFechaDevolucion()));
+			prestamo.setDiasRetraso(0);
 		} else if (prestamo.getFechaLimite().isBefore(hoy)) {
 			prestamo.setEstado(ESTADO_VENCIDO);
 			prestamo.setDiasRetraso((int) diasDeRetraso(prestamo.getFechaLimite(), hoy));

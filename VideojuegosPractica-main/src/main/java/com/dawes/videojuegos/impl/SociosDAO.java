@@ -38,8 +38,28 @@ public class SociosDAO implements ISociosDAO {
 	}
 
 	@Override
+	public boolean existeEmailDeOtroSocio(String email, int idSocio) throws SQLException {
+		return sociosRepository.existeEmailDeOtroSocio(email, idSocio);
+	}
+
+	@Override
 	public int insertarSocio(SociosDTO socio) throws SQLException {
 		return sociosRepository.insertarSocio(socio);
+	}
+
+	@Override
+	public int actualizarSocio(SociosDTO socio) throws SQLException {
+		return sociosRepository.actualizarSocio(socio);
+	}
+
+	@Override
+	public int eliminarSocio(int id) throws SQLException {
+		return sociosRepository.eliminarSocio(id);
+	}
+
+	@Override
+	public int contarPrestamosSocio(int id) throws SQLException {
+		return sociosRepository.contarPrestamosSocio(id);
 	}
 	@Override
 	public SociosDTO  buscarSocioPorId(int id) throws SQLException {

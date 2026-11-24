@@ -22,7 +22,7 @@ public class PrestamosRepository {
 	private static final Logger logger = LoggerFactory.getLogger(PrestamosRepository.class );
 	private static final String SQL_SELECT_PRESTAMOS =
 			"SELECT p.id, p.id_socio, p.id_copia, CONCAT(s.nombre, ' ', s.apellidos) AS socio, "
-					+ "v.titulo AS videojuego, pl.nombre AS plataforma, c.codigo_inventario AS codigoCopia, "
+					+ "v.titulo AS titulo, pl.nombre AS plataforma, c.codigo_inventario AS codigoInventario, "
 					+ "p.fecha_prestamo, p.fecha_limite, p.fecha_devolucion, p.multa, p.renovaciones "
 					+ "FROM prestamos p "
 					+ "JOIN socios s ON s.id = p.id_socio "
@@ -212,9 +212,9 @@ public class PrestamosRepository {
 				resultado.getInt("id"),
 				resultado.getInt("id_copia"),
 				resultado.getString("socio"),
-				resultado.getString("videojuego"),
+				resultado.getString("titulo"),
 				resultado.getString("plataforma"),
-				resultado.getString("codigoCopia"),
+				resultado.getString("codigoInventario"),
 				resultado.getDate("fecha_prestamo").toLocalDate(),
 				resultado.getDate("fecha_limite").toLocalDate(),
 				fechaDevolucion == null ? null : fechaDevolucion.toLocalDate(),

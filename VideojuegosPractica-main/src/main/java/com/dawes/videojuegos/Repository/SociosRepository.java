@@ -127,6 +127,56 @@ public class SociosRepository {
         }
         throw new SQLException("La base de datos no ha devuelto el id del socio insertado");
     }
+    public boolean existeEmailDeOtroSocio(String email, int idSocio) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM socios WHERE email = ? AND id <> ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ps.setInt(2, idSocio);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        }
+    }
+
+    public int actualizarSocio(SociosDTO socio) throws SQLException {
+        String sql = "UPDATE socios SET nombre = ?, apellidos = ?, email = ?, fecha_nacimiento = ?, activo = ? "
+                + "WHERE id = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, socio.getNombre());
+            ps.setString(2, socio.getApellidos());
+            ps.setString(3, socio.getEmail());
+            ps.setDate(4, Date.valueOf(socio.getFechaNacimiento()));
+            ps.setBoolean(5, socio.isActivo());
+            ps.setInt(6, socio.getId());
+            logger.debug("Query a ejecutar: {}", ps);
+            return ps.executeUpdate();
+        }
+    }
+
+    public int eliminarSocio(int id) throws SQLException {
+        String sql = "DELETE FROM socios WHERE id = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            logger.debug("Query a ejecutar: {}", ps);
+            return ps.executeUpdate();
+        }
+    }
+
+    public int contarPrestamosSocio(int id) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM prestamos WHERE id_socio = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getInt(1);
+            }
+        }
+    }
+
     public SociosDTO buscarSocioPorId(int id) throws SQLException {
         String sql = SQL_SELECT_SOCIOS + " WHERE s.id = ?";
         try (Connection connection = dataSource.getConnection();
