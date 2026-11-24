@@ -1,0 +1,25 @@
+info:
+  name: Insertar Videojuego
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: http://localhost:8080/api/videojuegos
+  body:
+    type: json
+    data: |-
+      {
+      "titulo": "Hades",
+      "anioLanzamiento": 2020,
+      "pegi": 16,
+      "idDesarrolladora": 4
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

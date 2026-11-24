@@ -1,0 +1,25 @@
+info:
+  name: Listar préstamos
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: ""
+  params:
+    - name: socio
+      value: ""
+      type: query
+      disabled: true
+    - name: titulo
+      value: ""
+      type: query
+      disabled: true
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

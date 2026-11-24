@@ -1,0 +1,36 @@
+info:
+  name: Listar con filtros
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: http://localhost:8080/api/videojuegos?idDesarrolladora=2
+  params:
+    - name: titulo
+      value: ""
+      type: query
+      disabled: true
+    - name: idDesarrolladora
+      value: "2"
+      type: query
+    - name: añoDesde
+      value: ""
+      type: query
+      disabled: true
+    - name: pegiMax
+      value: ""
+      type: query
+      disabled: true
+    - name: soloDisponible
+      value: ""
+      type: query
+      disabled: true
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
